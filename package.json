@@ -1,10 +1,15 @@
 {
   "devDependencies": {
-    "gh-pages": "^6.2.0"
+    "gh-pages": "^6.2.0",
+    "react-scripts": "^5.0.1"
   },
   "homepage": "https://andreaiacono.github.io/mazer",
   "scripts": {
-    "predeploy": "npm run build",
     "deploy": "gh-pages -d build",
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "predeploy": "npm run build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
   }
 }
