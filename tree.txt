@@ -1,0 +1,86 @@
+.
+├── build
+│   ├── asset-manifest.json
+│   ├── index.html
+│   └── static
+│       └── js
+│           ├── main.2e9f5d91.js
+│           ├── main.2e9f5d91.js.LICENSE.txt
+│           └── main.2e9f5d91.js.map
+├── package.json
+├── package-lock.json
+├── postcss.config.js
+├── public
+│   └── index.html
+├── src
+│   ├── App.tsx
+│   ├── components
+│   │   ├── MazeGenerator
+│   │   │   ├── ActionButtons.tsx
+│   │   │   ├── Canvas.tsx
+│   │   │   ├── Controls
+│   │   │   │   ├── AppearanceSection.tsx
+│   │   │   │   ├── GenerationSection.tsx
+│   │   │   │   ├── index.tsx
+│   │   │   │   └── SolvingSection.tsx
+│   │   │   └── index.tsx
+│   │   ├── README.md
+│   │   └── ui
+│   │       ├── accordion.tsx
+│   │       ├── button.tsx
+│   │       ├── card.tsx
+│   │       ├── checkbox.tsx
+│   │       ├── collapsible.tsx
+│   │       ├── input.tsx
+│   │       ├── number-slider.tsx
+│   │       ├── select.tsx
+│   │       ├── slider.tsx
+│   │       ├── toaster.tsx
+│   │       ├── toast.tsx
+│   │       └── use-toast.ts
+│   ├── contexts
+│   │   ├── MazeContext.ts
+│   │   └── MazeProvider.tsx
+│   ├── hooks
+│   │   ├── README.md
+│   │   ├── useMazeDrawing.ts
+│   │   ├── useMazeGeneration.ts
+│   │   └── useMazeSolving.ts
+│   ├── index.css
+│   ├── index.tsx
+│   ├── lib
+│   │   └── utils.ts
+│   ├── old
+│   │   ├── circular.tsx
+│   │   ├── index.tsx
+│   │   ├── main.tsx
+│   │   ├── maze-algorithms.ts
+│   │   ├── mazer.tsx
+│   │   ├── mazer_word2.tsx
+│   │   ├── mazer_word_good.tsx
+│   │   ├── mazer_word_size.tsx
+│   │   └── mazer_word.tsx
+│   ├── styles
+│   │   └── globals.css
+│   └── utils
+│       ├── constants.ts
+│       ├── helpers
+│       │   ├── drawing.ts
+│       │   ├── geometryHelpers.ts
+│       │   └── pathfinding.ts
+│       ├── mazeAlgorithms
+│       │   ├── binary.ts
+│       │   ├── huntAndKill.ts
+│       │   ├── index.ts
+│       │   ├── prims.ts
+│       │   ├── recursiveBacktracker.ts
+│       │   ├── recursiveDivision.ts
+│       │   ├── sidewinder.ts
+│       │   └── utils.ts
+│       ├── README.md
+│       └── types.ts
+├── tailwind.config.js
+├── tree.txt
+└── tsconfig.json
+
+4594 directories, 39127 files

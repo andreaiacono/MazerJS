@@ -1,27 +1,49 @@
 {
   "compilerOptions": {
-    "target": "es5",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
-    "allowJs": true,
-    "skipLibCheck": true,
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "strict": true,
-    "forceConsistentCasingInFileNames": true,
-    "noFallthroughCasesInSwitch": true,
-    "module": "esnext",
-    "moduleResolution": "node",
-    "resolveJsonModule": true,
+    // Module settings
+    "module": "ESNext",
+    "moduleResolution": "bundler",
     "isolatedModules": true,
+    "esModuleInterop": true,
+    "target": "es2015" ,
+
+    // React settings
+    "jsx": "react-jsx",
+    "lib": ["DOM", "DOM.Iterable", "ESNext"],
+
+    // Strict type checking
+    "strict": true,
+    "skipLibCheck": true,
     "noEmit": true,
-    "jsx": "react-jsx"
+    "allowJs": true,
+
+    // Module import settings
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+
+    // Base URL and paths (adjust these according to your project structure)
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
   },
-  "include": [
-    "src"
-  ]
+  "include": ["src/**/*.ts", "src/**/*.tsx"],
+  "exclude": ["node_modules"]
 }
-Last edited just now
+
+
+
+// {
+//     "target": "es5",
+//     "noFallthroughCasesInSwitch": true,
+//     "moduleResolution": "node",
+//   },
+//   "include": [
+//     "src"
+//   ]
+// }
+
+
+
+

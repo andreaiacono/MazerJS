@@ -1,6 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import MazeCreator from './mazer';
+import './index.css';
+import { MazeProvider } from './contexts/MazeProvider';
+import MazeGenerator from './components/MazeGenerator';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
@@ -8,6 +10,10 @@ const root = ReactDOM.createRoot(
 
 root.render(
   <React.StrictMode>
-    <MazeCreator />
+    <MazeProvider>
+      <div>
+        <MazeGenerator />
+      </div>
+    </MazeProvider>
   </React.StrictMode>
 );
