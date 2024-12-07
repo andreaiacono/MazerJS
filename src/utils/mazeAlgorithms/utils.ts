@@ -1,5 +1,21 @@
 import { Cell, Position, MazeSettings } from '../types';
 
+export const createEmptyGrid = (rows: number, columns: number): Cell[][] => {
+  return Array(rows).fill(null).map(() => 
+    Array(columns).fill(null).map(() => ({
+      northWall: true,
+      southWall: true,
+      eastWall: true,
+      westWall: true,
+      visited: false
+    }))
+  );
+};
+
+export const getRandomWithBias = (bias: number): boolean => {
+  return Math.random() < bias;
+};
+
 export const getUnvisitedNeighbors = (
   pos: Position,
   maze: Cell[][],
