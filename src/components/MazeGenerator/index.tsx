@@ -27,7 +27,8 @@ const MazeGenerator: React.FC = () => {
     solveMaze,
     showSolution,
     exportMaze,
-    solutionPath
+    solutionPath,
+    isSolving
   } = useMazeContext();
 
   const handleMazeSettingChange = (setting: keyof MazeSettings, value: any) => {
@@ -54,20 +55,6 @@ const MazeGenerator: React.FC = () => {
     updateSolverSettings({ [setting]: value });
   };
 
-  // useEffect(() => {
-  //   generateMaze();
-  // }, [frameType, algorithm, appearanceSettings.rows, appearanceSettings.columns, mazeSettings, appearanceSettings.polygonSides]); // Added polygonSides here
-
-
-  // useEffect(() => {
-  //   if (frameType === 'text') {
-  //     setDimensions({
-  //       width: CELLS_PER_LETTER * Math.max(text.length, 1),
-  //       height: rows
-  //     });
-  //   }
-  // }, [text, frameType]);
-  
   return (
     <div className="flex h-screen bg-gray-100">
       <Controls
@@ -92,6 +79,7 @@ const MazeGenerator: React.FC = () => {
             onSolve={solveMaze}
             onShowSolution={showSolution}
             onExport={exportMaze}
+            isSolving={isSolving}
           />
 
           <Canvas

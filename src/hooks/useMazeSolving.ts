@@ -1,7 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { Cell, Position, SolvingState } from '../utils/types';
 import { getValidMoves } from '../utils/helpers/pathfinding';
-// import { drawLine, getArrowPadding } from '../utils/helpers/drawing';
 
 export const useMazeSolving = (
   maze: Cell[][],
@@ -12,21 +11,25 @@ export const useMazeSolving = (
   const isCurrentlySolving = useRef(false);
   const speedRef = useRef(solveSpeed);
   const abortControllerRef = useRef<AbortController | null>(null);
-  const isCleaningUp = useRef(false);
 
   useEffect(() => {
     speedRef.current = solveSpeed;
   }, [solveSpeed]);
 
-  const abortSolving = useCallback(() => {
+  const abortSolving = useCallback((onDrawPath?: (path: Position[]) => void) => {
+    // Clear the path first, before any state changes
+    if (onDrawPath) {
+      onDrawPath([]);
+    }
+    
+    // Then abort the controller and reset states
     if (abortControllerRef.current) {
-      // Set cleanup flag before aborting
-      isCleaningUp.current = true;
       abortControllerRef.current.abort();
       abortControllerRef.current = null;
-      isCurrentlySolving.current = false;
-      setIsSolving(false);
     }
+    
+    isCurrentlySolving.current = false;
+    setIsSolving(false);
   }, []);
 
   const findEntranceExit = useCallback((isEntrance: boolean): Position | null => {
@@ -43,17 +46,12 @@ export const useMazeSolving = (
   const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
   const solveMaze = useCallback(async (onDrawPath: (path: Position[]) => void) => {
-
-    if (isCleaningUp.current) {
-      isCleaningUp.current = false;
+    // If already solving, abort and clear path first
+    if (isCurrentlySolving.current) {
+      abortSolving(onDrawPath);
       return;
     }
 
-    // Clear any existing solving process
-    abortSolving();
-
-    // onDrawPath([]);
-    // await delay(0);
     abortControllerRef.current = new AbortController();
     const { signal } = abortControllerRef.current;
 
@@ -63,14 +61,9 @@ export const useMazeSolving = (
       exit: Position,
       onDrawPath: (path: Position[]) => void
     ): Promise<boolean> => {
-
-      if (isCleaningUp.current || signal.aborted) {
+      if (signal.aborted) {
         return false;
       }
-
-      if (signal.aborted) return false;
-
-      // if (!isCurrentlySolving.current) return false;
 
       const current = state.currentPath[state.currentPath.length - 1];
 
@@ -82,12 +75,13 @@ export const useMazeSolving = (
       const moves = getValidMoves(current, maze, state.visited, frameType);
 
       for (const move of moves) {
-        if (!isCurrentlySolving.current) return false;
+        if (signal.aborted) return false;
 
         state.currentPath.push({ row: move.row, col: move.col });
         state.visited.add(`${move.row},${move.col}`);
 
         onDrawPath([...state.currentPath]);
+
         try {
           await Promise.race([
             delay(101 - speedRef.current),
@@ -96,24 +90,25 @@ export const useMazeSolving = (
             })
           ]);
         } catch (error) {
+          if (!signal.aborted) {
+            onDrawPath([]);
+          }
           return false;
         }
-
-        // console.log(solveSpeed)
-        // await delay(101 - speedRef.current);
 
         if (await animateSolving(state, entrance, exit, onDrawPath)) {
           return true;
         }
 
         state.currentPath.pop();
-        onDrawPath([...state.currentPath]);
+        if (!signal.aborted) {
+          onDrawPath([...state.currentPath]);
+        }
       }
 
       return false;
     };
-    // Start new animation
-    
+
     isCurrentlySolving.current = true;
     setIsSolving(true);
     onDrawPath([]); // Clear existing path
@@ -124,6 +119,7 @@ export const useMazeSolving = (
 
       if (!entrance || !exit) {
         console.error('No entrance or exit found');
+        abortSolving(onDrawPath);
         return;
       }
 
@@ -133,11 +129,20 @@ export const useMazeSolving = (
         found: false
       };
 
-      await animateSolving(state, entrance, exit, onDrawPath);
-    } finally {
-      if (!signal.aborted) {
-        abortSolving();
+      const solved = await animateSolving(state, entrance, exit, onDrawPath);
+      
+      if (solved) {
+        // On successful completion, only reset the solving states
+        isCurrentlySolving.current = false;
+        setIsSolving(false);
+        abortControllerRef.current = null;
+      } else if (!signal.aborted) {
+        // If not solved and not manually aborted, clear everything
+        abortSolving(onDrawPath);
       }
+    } catch (error) {
+      console.error('Error during maze solving:', error);
+      abortSolving(onDrawPath);
     }
   }, [maze, frameType, findEntranceExit, abortSolving]);
 
@@ -154,44 +159,3 @@ export const useMazeSolving = (
     abortSolving
   };
 };
-
-//     if (isCurrentlySolving.current) {
-//       isCurrentlySolving.current = false;
-//       setIsSolving(false);
-//       return;
-//     }
-
-//     onDrawPath([]);
-
-//     const entrance = findEntranceExit(true);
-//     const exit = findEntranceExit(false);
-
-//     if (!entrance || !exit) {
-//       console.error('No entrance or exit found');
-//       return;
-//     }
-
-//     isCurrentlySolving.current = true;
-//     setIsSolving(true);
-
-//     const state: SolvingState = {
-//       currentPath: [{ row: entrance.row, col: entrance.col }],
-//       visited: new Set([`${entrance.row},${entrance.col}`]),
-//       found: false
-//     };
-
-//     try {
-//       console.log("Starting solve with entrance:", entrance, "exit:", exit);
-//       const success = await animateSolving(state, entrance, exit, onDrawPath);
-//       console.log("Solve completed:", success ? "Solution found" : "No solution");
-//     } finally {
-//       isCurrentlySolving.current = false;
-//       setIsSolving(false);
-//     }
-//   }, [frameType, maze, findEntranceExit]);
-
-//   return {
-//     isSolving,
-//     solveMaze
-//   };
-// };

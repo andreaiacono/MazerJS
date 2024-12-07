@@ -61,7 +61,7 @@ export const MazeProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const [solutionPath, setSolutionPath] = useState<Position[]>([]);
 
-  const { solveMaze: solveWithAnimation, abortSolving } = useMazeSolving(
+  const { solveMaze: solveWithAnimation, abortSolving, isSolving } = useMazeSolving(
    maze,
     solverSettings.speed,
     frameType as 'square' | 'circular' | 'polygon' | 'text'
@@ -71,53 +71,6 @@ export const MazeProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const handlePathUpdate = useCallback((path: Position[]) => {
     setSolutionPath(path);
   }, []);
-
-
-  // const drawSolutionPath = useCallback((path: Position[]) => {
-  //   // Get canvas and context
-  //   const canvas = document.querySelector('canvas');
-  //   if (!canvas) return;
-
-  //   const ctx = canvas.getContext('2d');
-  //   if (!ctx) return;
-
-  //   // Save current path
-  //   setSolutionPath(path);
-
-  //   const arrowPadding = getArrowPadding(appearanceSettings.cellSize);
-
-  //   ctx.save();
-  //   ctx.translate(arrowPadding, arrowPadding);
-
-  //   // Clear the previous path
-  //   ctx.clearRect(-arrowPadding, -arrowPadding, canvas.width, canvas.height);
-
-  //   // Redraw the maze (you'll need to call your maze drawing function here)
-  //   // drawMaze(ctx, maze, frameType, ...); // You'll need to implement this part
-
-  //   // Draw the solution path
-  //   if (path.length > 0) {
-  //     ctx.strokeStyle = solverSettings.solutionColor;
-  //     ctx.lineWidth = appearanceSettings.cellSize / 3;
-  //     ctx.lineCap = 'round';
-  //     ctx.lineJoin = 'round';
-
-  //     ctx.beginPath();
-  //     path.forEach((pos, index) => {
-  //       const x = (pos.col + 0.5) * appearanceSettings.cellSize;
-  //       const y = (pos.row + 0.5) * appearanceSettings.cellSize;
-
-  //       if (index === 0) {
-  //         ctx.moveTo(x, y);
-  //       } else {
-  //         ctx.lineTo(x, y);
-  //       }
-  //     });
-  //     ctx.stroke();
-  //   }
-
-  //   ctx.restore();
-  // }, [maze, frameType, appearanceSettings.cellSize, solverSettings.solutionColor]);
 
   // Maze generation function
 
@@ -186,20 +139,24 @@ export const MazeProvider: React.FC<{ children: React.ReactNode }> = ({ children
     );
 
     setMaze(newMaze);
-  }, [algorithm, appearanceSettings, mazeSettings, frameType]);
+  }, [algorithm, appearanceSettings, mazeSettings, frameType, abortSolving]);
 
-  const solveMaze = useCallback(async () => {
+
+  const handleSolveMaze = useCallback(async () => {
+    if (isSolving) {
+      // If already solving, abort
+      abortSolving();
+      setSolutionPath([]);
+      return;
+    }
+
     setSolutionPath([]); // Reset path
-    setSolverSettings(prev => ({ ...prev, isSolving: true }));
-
     try {
       await solveWithAnimation(handlePathUpdate);
     } catch (error) {
       console.error('Error during maze solving:', error);
-    } finally {
-      setSolverSettings(prev => ({ ...prev, isSolving: false }));
     }
-  }, [solveWithAnimation, handlePathUpdate]);
+  }, [solveWithAnimation, handlePathUpdate, isSolving, abortSolving]);
 
 
   const showSolution = useCallback(() => {
@@ -225,6 +182,7 @@ export const MazeProvider: React.FC<{ children: React.ReactNode }> = ({ children
     algorithm,
     setAlgorithm,
     solutionPath,
+    isSolving,
 
     // Settings
     mazeSettings,
@@ -236,7 +194,7 @@ export const MazeProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     // Actions
     generateMaze,
-    solveMaze,
+    solveMaze: handleSolveMaze,
     showSolution,
     exportMaze,
   };

@@ -34,6 +34,7 @@ interface MazeContextType {
   solveMaze: () => void;
   showSolution: () => void;
   exportMaze: () => void;
+  isSolving: boolean
 }
 
 export const MazeContext = createContext<MazeContextType | undefined>(undefined);

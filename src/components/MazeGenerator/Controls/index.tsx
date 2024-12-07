@@ -44,7 +44,7 @@ export const Controls: React.FC<ControlsProps> = ({
         fixed top-0 left-0 h-full bg-white shadow-lg
         transform transition-transform duration-300 ease-in-out
         ${isOpen ? 'translate-x-0' : '-translate-x-full'}
-        w-80 z-10
+        w-80 z-10 
       `}
     >
       <Card className="h-full">
@@ -118,15 +118,15 @@ export const Controls: React.FC<ControlsProps> = ({
       </Card>
 
       <button
-        className={`
-          absolute top-1/2 -translate-y-1/2
-          right-0 transform translate-x-full
-          bg-white rounded-r-lg p-2 shadow-md hover:bg-gray-50
-        `}
-        onClick={() => setIsOpen(!isOpen)}
-      >
-        {isOpen ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-      </button>
-    </div>
+          className={`
+            absolute top-1/2 -translate-y-1/2
+            right-0 transform translate-x-full
+            bg-white rounded-r-lg p-2 shadow-md hover:bg-gray-50
+          `}
+          onClick={() => setIsOpen(!isOpen)}
+        >
+          {isOpen ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+        </button>
+  </div>
   );
 };
