@@ -1,78 +1,64 @@
 import { Cell } from '../types';
+import { createEmptyGrid, getRandomWithBias } from './utils';
 
 export const recursiveDivision = (
-  rows: number,
+  rows: number, 
   columns: number,
   horizontalBias: number
 ): Cell[][] => {
-  // Initialize maze with NO walls (opposite of other algorithms)
-  const maze: Cell[][] = Array(rows).fill(null).map(() =>
-    Array(columns).fill(null).map(() => ({
-      northWall: false,
-      southWall: false,
-      eastWall: false,
-      westWall: false,
-      visited: false
-    }))
-  );
-
-  // Add outer walls
-  for (let i = 0; i < rows; i++) {
-    maze[i][0].westWall = true;
-    maze[i][columns - 1].eastWall = true;
-  }
-  for (let i = 0; i < columns; i++) {
-    maze[0][i].northWall = true;
-    maze[rows - 1][i].southWall = true;
-  }
-
-  // Start recursive division
-  divide(maze, 0, 0, rows, columns, horizontalBias);
-
-  return maze;
-};
-
-const divide = (
-  maze: Cell[][],
-  startRow: number,
-  startCol: number,
-  height: number,
-  width: number,
-  horizontalBias: number
-) => {
-  if (height <= 2 || width <= 2) return;
-
-  const horizontal = Math.random() < horizontalBias;
+  horizontalBias /= 100
+  const grid = createEmptyGrid(rows, columns);
   
-  if (horizontal) {
-    const row = startRow + Math.floor(Math.random() * (height - 2)) + 1;
-    const passage = startCol + Math.floor(Math.random() * width);
-
-    // Add horizontal wall
-    for (let col = startCol; col < startCol + width; col++) {
-      if (col !== passage) {
-        maze[row][col].southWall = true;
-        maze[row - 1][col].northWall = true;
-      }
+  // Start with all internal walls removed
+  for (let row = 0; row < rows; row++) {
+    for (let col = 0; col < columns; col++) {
+      if (row > 0) grid[row][col].northWall = false;
+      if (row < rows-1) grid[row][col].southWall = false;
+      if (col > 0) grid[row][col].westWall = false;
+      if (col < columns-1) grid[row][col].eastWall = false;
     }
-
-    // Recursively divide regions
-    divide(maze, startRow, startCol, row - startRow, width, horizontalBias);
-    divide(maze, row, startCol, height - (row - startRow), width, horizontalBias);
-  } else {
-    const col = startCol + Math.floor(Math.random() * (width - 2)) + 1;
-    const passage = startRow + Math.floor(Math.random() * height);
-
-    // Add vertical wall
-    for (let row = startRow; row < startRow + height; row++) {
-      if (row !== passage) {
-        maze[row][col].eastWall = true;
-        maze[row][col - 1].westWall = true;
-      }
-    }
-
-    // Recursively divide regions
-    divide(maze, startRow, startCol, height, col - startCol, horizontalBias);
-    divide(maze, startRow, col, height, width - (col - startCol), horizontalBias);
   }
+
+  const divide = (
+    startRow: number, 
+    startCol: number, 
+    height: number, 
+    width: number
+  ) => {
+    if (height <= 1 || width <= 1) return;
+
+    // Use horizontalBias to determine wall orientation
+    const horizontal = getRandomWithBias(horizontalBias);
+
+    if (horizontal) {
+      const wallRow = startRow + Math.floor(Math.random() * (height - 1)) + 1;
+      const passage = startCol + Math.floor(Math.random() * width);
+
+      for (let col = startCol; col < startCol + width; col++) {
+        if (col !== passage) {
+          grid[wallRow][col].northWall = true;
+          grid[wallRow-1][col].southWall = true;
+        }
+      }
+
+      divide(startRow, startCol, wallRow - startRow, width);
+      divide(wallRow, startCol, height - (wallRow - startRow), width);
+    } else {
+      const wallCol = startCol + Math.floor(Math.random() * (width - 1)) + 1;
+      const passage = startRow + Math.floor(Math.random() * height);
+
+      for (let row = startRow; row < startRow + height; row++) {
+        if (row !== passage) {
+          grid[row][wallCol].westWall = true;
+          grid[row][wallCol-1].eastWall = true;
+        }
+      }
+
+      divide(startRow, startCol, height, wallCol - startCol);
+      divide(startRow, wallCol, height, width - (wallCol - startCol));
+    }
+  };
+
+  divide(0, 0, rows, columns);
+  return grid;
 };
