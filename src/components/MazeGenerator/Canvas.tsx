@@ -36,31 +36,20 @@ export const Canvas: React.FC<CanvasProps> = ({
   const { drawMaze } = useMazeDrawing();
 
   useEffect(() => {
-    console.log('Canvas useEffect triggered', {
-      mazeLength: maze?.length,
-      frameType,
-      rows,
-      columns,
-      cellSize
-    });
 
     const canvas = canvasRef.current;
     if (!canvas) {
-      console.log('No canvas element found');
       return;
     }
 
     const ctx = canvas.getContext('2d');
     if (!ctx) {
-      console.log('No canvas context found');
       return;
     }
 
     const arrowPadding = getArrowPadding(cellSize);
     const canvasWidth = columns * cellSize + (2 * arrowPadding);
     const canvasHeight = rows * cellSize + (2 * arrowPadding);
-
-    console.log('Canvas dimensions:', { canvasWidth, canvasHeight, arrowPadding });
 
     // Set canvas dimensions
     canvas.width = canvasWidth;
