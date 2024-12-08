@@ -28,7 +28,7 @@ export const MazeProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [maze, setMaze] = useState<Cell[][]>([]);
   const [frameType, setFrameType] = useState<FrameType>('square');
   const [algorithm, setAlgorithm] = useState<MazeAlgorithm>('recursive-backtracker');
-
+  
   // Settings states
   const [mazeSettings, setMazeSettings] = useState<MazeSettings>({
     horizontalBias: 90,
@@ -60,9 +60,10 @@ export const MazeProvider: React.FC<{ children: React.ReactNode }> = ({ children
   });
 
   const [solutionPath, setSolutionPath] = useState<Position[]>([]);
+  const [isSolutionShown, setIsSolutionShown] = useState(false);
 
   const { solveMaze: solveWithAnimation, abortSolving, isSolving } = useMazeSolving(
-   maze,
+    maze,
     solverSettings.speed,
     frameType as 'square' | 'circular' | 'polygon' | 'text'
   );
@@ -72,10 +73,8 @@ export const MazeProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setSolutionPath(path);
   }, []);
 
-  // Maze generation function
 
   const generateMaze = useCallback(() => {
-    console.log('Generating maze with algorithm:', algorithm);
 
     abortSolving();
     setSolutionPath([]);
@@ -141,27 +140,34 @@ export const MazeProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setMaze(newMaze);
   }, [algorithm, appearanceSettings, mazeSettings, frameType, abortSolving]);
 
+  const showSolution = useCallback(async () => {
+    if (isSolutionShown) {
+      setSolutionPath([]);
+      setIsSolutionShown(false);
+    } else {
+      try {
+        await solveWithAnimation(handlePathUpdate, false);
+        setIsSolutionShown(true);
+      } catch (error) {
+        console.error('Error showing solution:', error);
+      }
+    }
+  }, [solveWithAnimation, handlePathUpdate, isSolutionShown]);
 
   const handleSolveMaze = useCallback(async () => {
+    setSolutionPath([]);
     if (isSolving) {
-      // If already solving, abort
       abortSolving();
-      setSolutionPath([]);
       return;
     }
 
-    setSolutionPath([]); // Reset path
     try {
-      await solveWithAnimation(handlePathUpdate);
+      await solveWithAnimation(handlePathUpdate, true);
     } catch (error) {
       console.error('Error during maze solving:', error);
     }
   }, [solveWithAnimation, handlePathUpdate, isSolving, abortSolving]);
 
-
-  const showSolution = useCallback(() => {
-    // Implement solution showing logic here
-  }, []);
 
   const exportMaze = useCallback(() => {
 
@@ -197,6 +203,7 @@ export const MazeProvider: React.FC<{ children: React.ReactNode }> = ({ children
     solveMaze: handleSolveMaze,
     showSolution,
     exportMaze,
+    isSolutionShown
   };
 
   return (

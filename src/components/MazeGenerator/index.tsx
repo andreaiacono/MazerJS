@@ -7,7 +7,6 @@ import { MazeSettings, AppearanceSettings, SolverSettings } from '../../utils/ty
 // import { useEffect } from 'react';
 
 const MazeGenerator: React.FC = () => {
-  console.log("MazeGenerator rendering");
   const [isOpen, setIsOpen] = useState(true);
 
   const {
@@ -28,7 +27,8 @@ const MazeGenerator: React.FC = () => {
     showSolution,
     exportMaze,
     solutionPath,
-    isSolving
+    isSolving,
+    isSolutionShown
   } = useMazeContext();
 
   const handleMazeSettingChange = (setting: keyof MazeSettings, value: any) => {
@@ -80,6 +80,7 @@ const MazeGenerator: React.FC = () => {
             onShowSolution={showSolution}
             onExport={exportMaze}
             isSolving={isSolving}
+            isSolutionShown={isSolutionShown}
           />
 
           <Canvas

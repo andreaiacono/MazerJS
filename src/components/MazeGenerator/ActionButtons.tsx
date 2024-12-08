@@ -7,6 +7,7 @@ interface ActionButtonsProps {
   onShowSolution: () => void;
   onExport: () => void;
   isSolving: boolean;
+  isSolutionShown: boolean;
 }
 
 export const ActionButtons: React.FC<ActionButtonsProps> = ({
@@ -14,13 +15,14 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
   onSolve,
   onShowSolution,
   onExport,
-  isSolving
+  isSolving,
+  isSolutionShown
 }) => {
   return (
     <div className="absolute top-8 left-8 z-20 flex gap-2">
       <Button onClick={onGenerate}>Generate</Button>
       <Button onClick={onSolve}> {isSolving ? 'Stop Solving' : 'Solve'}</Button>
-      <Button onClick={onShowSolution}>Show Solution</Button>
+      <Button onClick={onShowSolution} disabled={isSolving}>{isSolutionShown ? 'Hide Solution' : 'Show Solution'}</Button>
       <Button onClick={onExport}>Export</Button>
     </div>
   );
