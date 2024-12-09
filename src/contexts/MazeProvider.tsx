@@ -19,8 +19,7 @@ import {
   huntAndKill
 } from '../utils/mazeAlgorithms';
 import { useMazeSolving } from '../hooks/useMazeSolving';
-// import { getArrowPadding } from '../utils/helpers/drawing';
-// import { useMazeDrawing } from '../hooks/useMazeDrawing';
+
 
 
 export const MazeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -204,7 +203,8 @@ export const MazeProvider: React.FC<{ children: React.ReactNode }> = ({ children
     solveMaze: handleSolveMaze,
     showSolution,
     exportMaze,
-    isSolutionShown
+    isSolutionShown,
+    setSolutionPath
   };
 
   return (
