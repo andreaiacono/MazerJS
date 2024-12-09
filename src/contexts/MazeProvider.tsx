@@ -28,7 +28,7 @@ export const MazeProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [maze, setMaze] = useState<Cell[][]>([]);
   const [frameType, setFrameType] = useState<FrameType>('square');
   const [algorithm, setAlgorithm] = useState<MazeAlgorithm>('recursive-backtracker');
-  
+
   // Settings states
   const [mazeSettings, setMazeSettings] = useState<MazeSettings>({
     horizontalBias: 90,
@@ -60,9 +60,8 @@ export const MazeProvider: React.FC<{ children: React.ReactNode }> = ({ children
   });
 
   const [solutionPath, setSolutionPath] = useState<Position[]>([]);
-  const [isSolutionShown, setIsSolutionShown] = useState(false);
 
-  const { solveMaze: solveWithAnimation, abortSolving, isSolving } = useMazeSolving(
+  const { solveMaze: solveWithAnimation, abortSolving, isSolving, isSolutionShown, setIsSolutionShown } = useMazeSolving(
     maze,
     solverSettings.speed,
     frameType as 'square' | 'circular' | 'polygon' | 'text'
@@ -146,27 +145,29 @@ export const MazeProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setIsSolutionShown(false);
     } else {
       try {
-        await solveWithAnimation(handlePathUpdate, false);
+        await solveWithAnimation(handlePathUpdate, false, (shown) => setIsSolutionShown(shown));
         setIsSolutionShown(true);
       } catch (error) {
         console.error('Error showing solution:', error);
       }
     }
-  }, [solveWithAnimation, handlePathUpdate, isSolutionShown]);
+  }, [solveWithAnimation, handlePathUpdate, isSolutionShown, setIsSolutionShown]);
 
   const handleSolveMaze = useCallback(async () => {
     setSolutionPath([]);
+    setIsSolutionShown(isSolutionShown)
     if (isSolving) {
       abortSolving();
       return;
     }
 
     try {
-      await solveWithAnimation(handlePathUpdate, true);
+      await solveWithAnimation(handlePathUpdate, true, (shown) => setIsSolutionShown(shown)  // Pass callback to handle solution shown state
+      );
     } catch (error) {
       console.error('Error during maze solving:', error);
     }
-  }, [solveWithAnimation, handlePathUpdate, isSolving, abortSolving]);
+  }, [solveWithAnimation, handlePathUpdate, isSolving, abortSolving, setIsSolutionShown]);
 
 
   const exportMaze = useCallback(() => {

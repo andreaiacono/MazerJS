@@ -8,6 +8,7 @@ export const useMazeSolving = (
   frameType: 'square' | 'circular' | 'polygon' | 'text'
 ) => {
   const [isSolving, setIsSolving] = useState(false);
+  const [isSolutionShown, setIsSolutionShown] = useState(false);
   const isCurrentlySolving = useRef(false);
   const speedRef = useRef(solveSpeed);
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -30,6 +31,7 @@ export const useMazeSolving = (
 
     isCurrentlySolving.current = false;
     setIsSolving(false);
+    setIsSolutionShown(false)
   }, []);
 
   const findEntranceExit = useCallback((isEntrance: boolean): Position | null => {
@@ -104,7 +106,9 @@ export const useMazeSolving = (
 
   const solveMaze = useCallback(async (
     onDrawPath: (path: Position[]) => void,
-    showAnimation: boolean) => {
+    showAnimation: boolean,
+    onSolutionShown?: (shown: boolean) => void  // Add callback parameter
+  ) => {
     // If already solving, abort and clear path first
     if (isCurrentlySolving.current) {
       abortSolving(onDrawPath);
@@ -142,6 +146,7 @@ export const useMazeSolving = (
         // On successful completion, only reset the solving states
         isCurrentlySolving.current = false;
         setIsSolving(false);
+        setIsSolutionShown(true)
         abortControllerRef.current = null;
       } else if (!signal.aborted) {
         // If not solved and not manually aborted, clear everything
@@ -162,7 +167,9 @@ export const useMazeSolving = (
 
   return {
     isSolving,
+    isSolutionShown,
     solveMaze,
-    abortSolving
+    abortSolving,
+    setIsSolutionShown
   };
 };
