@@ -23,8 +23,8 @@ export const AppearanceSection: React.FC<AppearanceSectionProps> = ({
 
   const sliderConfigs = {
     square: [
-      { key: 'rows', label: "Rows", value: settings.rows, min: 5, max: 80 },
-      { key: 'columns', label: "Columns", value: settings.columns, min: 5, max: 80 }
+      { key: 'rows', label: "Rows", value: settings.rows, min: 4, max: 100 },
+      { key: 'columns', label: "Columns", value: settings.columns, min: 4, max: 200 }
     ],
     circular: [
       { key: 'rows', label: "Rings", value: settings.rows, min: 5, max: 80 },
@@ -65,12 +65,10 @@ export const AppearanceSection: React.FC<AppearanceSectionProps> = ({
               label={config.label}
               value={config.value}
               onChange={(value, sliderInfo) => {
-                console.log(`Slider ${sliderInfo?.label} changed to ${value}`);
                 onSettingChange(config.key as keyof AppearanceSettings, value);
               }}
-              onChangeEnd={() => {
-                console.log(`Slider ${config.label} change ended`);
-              }}
+              // onChangeEnd={() => {
+              // }}
               min={config.min ?? 5}
               max={config.max ?? 80}
               step={1}
@@ -82,7 +80,7 @@ export const AppearanceSection: React.FC<AppearanceSectionProps> = ({
             label="Cell Size"
             value={settings.cellSize}
             onChange={(value) => onSettingChange('cellSize', value)}
-            min={10}
+            min={5}
             max={80}
           />
 

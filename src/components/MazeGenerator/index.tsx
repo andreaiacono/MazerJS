@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useMazeContext } from '../../contexts/MazeContext';
 import { Controls } from './Controls';
 import { ActionButtons } from './ActionButtons';
@@ -45,11 +45,13 @@ const MazeGenerator: React.FC = () => {
       ...prev,
       [setting]: value
     }));
-    console.log(setting)
-    if (setting === "rows" || setting === "columns" || setting === "polygonSides") {
+  };
+
+  useEffect(() => {
+    if (appearanceSettings) {
       generateMaze();
     }
-  };
+  }, [appearanceSettings.rows, appearanceSettings.columns, appearanceSettings.polygonSides]);
 
   const handleSolverSettingChange = (setting: keyof SolverSettings, value: any) => {
     updateSolverSettings({ [setting]: value });
