@@ -37,8 +37,24 @@ export const Canvas: React.FC<CanvasProps> = ({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { drawMaze } = useMazeDrawing();
 
-  useEffect(() => {
+  const getCanvasDimensions = () => {
+    const arrowPadding = getArrowPadding(cellSize);
 
+    if (frameType === 'circular') {
+      return {
+        width: 20 * cellSize + (2 * arrowPadding),
+        height: 20 * cellSize + (2 * arrowPadding)
+      };
+    }
+
+    // For other frame types, use the original calculation
+    return {
+      width: columns * cellSize + (2 * arrowPadding),
+      height: rows * cellSize + (2 * arrowPadding)
+    };
+  };
+
+  useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) {
       return;
@@ -49,13 +65,11 @@ export const Canvas: React.FC<CanvasProps> = ({
       return;
     }
 
-    const arrowPadding = getArrowPadding(cellSize);
-    const canvasWidth = columns * cellSize + (2 * arrowPadding);
-    const canvasHeight = rows * cellSize + (2 * arrowPadding);
-
+    const { width, height } = getCanvasDimensions();
+    
     // Set canvas dimensions
-    canvas.width = canvasWidth;
-    canvas.height = canvasHeight;
+    canvas.width = width;
+    canvas.height = height;
 
     // Draw the maze using the drawMaze utility
     drawMaze(ctx, maze, frameType, {
@@ -71,20 +85,21 @@ export const Canvas: React.FC<CanvasProps> = ({
       solutionPath,
       text
     });
+  }, [maze, frameType, rows, columns, cellSize, wallColor, backgroundColor, 
+      wallThickness, showArrows, sides, solutionColor, drawMaze, solutionPath, text]);
 
-  }, [maze, frameType, rows, columns, cellSize, wallColor, backgroundColor, wallThickness, showArrows, sides, solutionColor, drawMaze, solutionPath, text]);
-
+  const { width, height } = getCanvasDimensions();
   const arrowPadding = getArrowPadding(cellSize);
 
   return (
     <canvas
       ref={canvasRef}
-      width={columns * cellSize + (2 * arrowPadding)}
-      height={rows * cellSize + (2 * arrowPadding)}
+      width={width}
+      height={height}
       style={{
         backgroundColor,
         margin: -arrowPadding,
-        border: '2px solid #ccc' // Debug border
+        border: '2px solid #ccc'
       }}
     />
   );

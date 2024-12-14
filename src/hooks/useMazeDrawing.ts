@@ -79,12 +79,16 @@ export const useMazeDrawing = () => {
     ) => {
       if (!maze || maze.length === 0 || !maze[0]) return;
 
+      // Use fixed canvas size of 20 cells for positioning
+      const fixedSize = 20 * cellSize;
+      const centerX = fixedSize / 2;
+      const centerY = fixedSize / 2;
+
       const rings = maze.length;
       const sectors = maze[0].length;
-      const centerX = (columns * cellSize) / 2;
-      const centerY = (rows * cellSize) / 2;
       const maxRadius = Math.min(centerX, centerY) * 0.8;
-      const ringWidth = maxRadius / (rings + 1); // Add 1 to account for empty inner ring
+      const ringWidth = maxRadius / (rings + 1);
+
 
       ctx.strokeStyle = wallColor;
       ctx.lineWidth = wallThickness;
@@ -549,9 +553,13 @@ export const useMazeDrawing = () => {
         if (!solutionPath.length) return;
 
         if (frameType === 'circular') {
+          // Use fixed canvas size of 20 cells for positioning
+          const fixedSize = 20 * cellSize;
+          const centerX = fixedSize / 2;
+          const centerY = fixedSize / 2;
+
           const rings = maze.length;
-          const centerX = (columns * cellSize) / 2;
-          const centerY = (rows * cellSize) / 2;
+          const sectors = maze[0].length;
           const maxRadius = Math.min(centerX, centerY) * 0.8;
           const ringWidth = maxRadius / (rings + 1);
 
