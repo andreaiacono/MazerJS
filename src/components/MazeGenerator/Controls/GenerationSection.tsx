@@ -15,30 +15,73 @@ export const GenerationSection: React.FC<GenerationSectionProps> = ({
   mazeSettings,
   onMazeSettingChange,
 }) => {
-  const getAlgorithmSettings = (algo: MazeAlgorithm) => {
-    switch (algo) {
-      case 'binary':
-        return ['horizontalBias'];
-      case 'sidewinder':
-        return ['horizontalBias', 'branchingProbability'];
-      case 'recursive-backtracker':
-        return ['branchingProbability', 'deadEndDensity'];
-      case 'prims':
-        return ['branchingProbability'];
-      case 'recursive-division':
-        return ['horizontalBias'];
-      case 'hunt-and-kill':
-        return ['branchingProbability', 'deadEndDensity'];
-      default:
-        return [];
-    }
+  // Configuration object for algorithm-specific settings
+  const algorithmConfigs: Record<MazeAlgorithm, Array<{
+    key: keyof MazeSettings;
+    label: string;
+    min?: number;
+    max?: number;
+    step?: number;
+  }>> = {
+    'binary': [
+      { key: 'horizontalBias', label: 'Horizontal Bias (%)', min: 0, max: 100 }
+    ],
+    'sidewinder': [
+      { key: 'horizontalBias', label: 'Horizontal Bias (%)', min: 0, max: 100 },
+      { key: 'branchingProbability', label: 'Branching Probability (%)', min: 1, max: 100 }
+    ],
+    'recursive-backtracker': [
+      { key: 'branchingProbability', label: 'Branching Probability (%)', min: 1, max: 100 },
+      { key: 'deadEndDensity', label: 'Dead End Density (%)', min: 0, max: 100 }
+    ],
+    'prims': [
+      { key: 'branchingProbability', label: 'Branching Probability (%)', min: 1, max: 100 }
+    ],
+    'recursive-division': [
+      { key: 'horizontalBias', label: 'Horizontal Bias (%)', min: 0, max: 100 }
+    ],
+    'hunt-and-kill': [
+      { key: 'branchingProbability', label: 'Branching Probability (%)', min: 1, max: 100 },
+      { key: 'deadEndDensity', label: 'Dead End Density (%)', min: 0, max: 100 }
+    ]
   };
 
-  const settingLabels = {
-    horizontalBias: 'Horizontal Bias (%)',
-    branchingProbability: 'Branching Probability (%)',
-    deadEndDensity: 'Dead End Density (%)'
-  };
+  // Configuration object for select inputs
+  const selectConfigs = [
+    {
+      key: 'entrancePosition' as keyof MazeSettings,
+      label: 'Entrance Position',
+      options: [
+        { value: 'north', label: 'North' },
+        { value: 'south', label: 'South' },
+        { value: 'east', label: 'East' },
+        { value: 'west', label: 'West' },
+        { value: 'random', label: 'Random' }
+      ]
+    },
+    {
+      key: 'exitPosition' as keyof MazeSettings,
+      label: 'Exit Position',
+      options: [
+        { value: 'north', label: 'North' },
+        { value: 'south', label: 'South' },
+        { value: 'east', label: 'East' },
+        { value: 'west', label: 'West' },
+        { value: 'random', label: 'Random' },
+        { value: 'farthest', label: 'Farthest from Entrance' }
+      ]
+    },
+    {
+      key: 'symmetry' as keyof MazeSettings,
+      label: 'Symmetry',
+      options: [
+        { value: 'none', label: 'None' },
+        { value: 'horizontal', label: 'Horizontal' },
+        { value: 'vertical', label: 'Vertical' },
+        { value: 'both', label: 'Both' }
+      ]
+    }
+  ];
 
   return (
     <AccordionItem value="generation" className="border-t">
@@ -47,81 +90,39 @@ export const GenerationSection: React.FC<GenerationSectionProps> = ({
       </AccordionTrigger>
       <AccordionContent>
         <div className="pt-4 space-y-4">
-          {getAlgorithmSettings(algorithm).map((setting) => (
+          {algorithmConfigs[algorithm]?.map((config) => (
             <NumberSlider
-              key={setting}
-              label={settingLabels[setting as keyof typeof settingLabels]}
-              value={mazeSettings[setting as keyof MazeSettings] as number}
-              onChange={(value) => onMazeSettingChange(setting as keyof MazeSettings, value)}
-              min={0}
-              max={100}
-              step={1}
+              key={config.key}
+              label={config.label}
+              value={mazeSettings[config.key] as number}
+              onChange={(value) => onMazeSettingChange(config.key, value)}
+              min={config.min ?? 0}
+              max={config.max ?? 100}
+              step={config.step ?? 1}
             />
           ))}
 
           <div className="space-y-4">
-            <div>
-              <label className="block mb-2 font-small">Entrance Position</label>
-              <Select
-                value={mazeSettings.entrancePosition}
-                onValueChange={(value: any) => 
-                  onMazeSettingChange('entrancePosition', value)
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select entrance position" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="north">North</SelectItem>
-                  <SelectItem value="south">South</SelectItem>
-                  <SelectItem value="east">East</SelectItem>
-                  <SelectItem value="west">West</SelectItem>
-                  <SelectItem value="random">Random</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <label className="block mb-2 font-small">Exit Position</label>
-              <Select
-                value={mazeSettings.exitPosition}
-                onValueChange={(value: any) => 
-                  onMazeSettingChange('exitPosition', value)
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select exit position" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="north">North</SelectItem>
-                  <SelectItem value="south">South</SelectItem>
-                  <SelectItem value="east">East</SelectItem>
-                  <SelectItem value="west">West</SelectItem>
-                  <SelectItem value="random">Random</SelectItem>
-                  <SelectItem value="farthest">Farthest from Entrance</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <label className="block mb-2 font-small">Symmetry</label>
-              <Select
-                value={mazeSettings.symmetry}
-                onValueChange={(value: any) => 
-                  onMazeSettingChange('symmetry', value)
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select symmetry type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">None</SelectItem>
-                  <SelectItem value="horizontal">Horizontal</SelectItem>
-                  <SelectItem value="vertical">Vertical</SelectItem>
-                  <SelectItem value="both">Both</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            {selectConfigs.map((config) => (
+              <div key={config.key}>
+                <label className="block mb-2 font-small">{config.label}</label>
+                <Select
+                  value={mazeSettings[config.key] as string}
+                  onValueChange={(value) => onMazeSettingChange(config.key, value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={`Select ${config.label.toLowerCase()}`} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {config.options.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            ))}
           </div>
         </div>
       </AccordionContent>
