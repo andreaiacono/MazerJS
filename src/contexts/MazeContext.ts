@@ -28,6 +28,9 @@ interface MazeContextType {
   solutionPath: Position[];
   setSolutionPath: (path: Position[]) => void;
 
+  letterCells: Set<string>;
+  setLetterCells: (cells: Set<string>) => void;
+  
   // Actions
   generateMaze: () => void;
   // drawMaze: () => void;

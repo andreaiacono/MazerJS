@@ -36,7 +36,8 @@ export const AppearanceSection: React.FC<AppearanceSectionProps> = ({
       { key: 'columns', label: "Columns", value: settings.columns, min: 5, max: 80 }
     ],
     text: [
-      { key: 'letterDistance', label: "Letter Distance", value: settings.columns, min: 5, max: 20 }
+      { key: 'letterSize', label: "Letter Size", value: settings.letterSize, min: 5, max: 20 },
+      { key: 'letterDistance', label: "Letter Distance", value: settings.letterDistance, min: 5, max: 20 }
     ]
   };
 
@@ -47,16 +48,20 @@ export const AppearanceSection: React.FC<AppearanceSectionProps> = ({
       </AccordionTrigger>
       <AccordionContent>
         <div className="pt-4 space-y-4">
-          {frameType === 'text' && (
-            <div>
-              <label className="block mb-2 font-small">Text</label>
-              <Input
-                value={settings.text}
-                onChange={(e) => onSettingChange('text', e.target.value.toUpperCase())}
-                maxLength={10}
-              />
-            </div>
-          )}
+
+        {frameType === 'text' && (
+          <div className="flex items-center gap-4">
+           <span>Text</span>
+            <Input
+              type="text"
+              value={settings.text}
+              onChange={(e) => onSettingChange('text', e.target.value.toUpperCase())}
+              className="w-full px-3 py-2 border rounded-md"
+              maxLength={10}
+            />
+          </div>
+        )}
+
 
 
           {sliderConfigs[frameType]?.map((config) => (

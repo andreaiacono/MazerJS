@@ -32,3 +32,18 @@ root.render(
 //     <MazeCreator />
 //   </React.StrictMode>
 // );
+
+// import React from 'react';
+// import ReactDOM from 'react-dom/client';
+// import MazeCreator from './old/mazer_word';
+// import './styles/globals.css';
+
+// const root = ReactDOM.createRoot(
+//   document.getElementById('root') as HTMLElement
+// );
+
+// root.render(
+//   <React.StrictMode>
+//     <MazeCreator />
+//   </React.StrictMode>
+// );

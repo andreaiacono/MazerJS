@@ -27,6 +27,7 @@ export const MazeProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [maze, setMaze] = useState<Cell[][]>([]);
   const [frameType, setFrameType] = useState<FrameType>('square');
   const [algorithm, setAlgorithm] = useState<MazeAlgorithm>('recursive-backtracker');
+  const [letterCells, setLetterCells] = useState<Set<string>>(new Set());
 
   // Settings states
   const [mazeSettings, setMazeSettings] = useState<MazeSettings>({
@@ -49,7 +50,8 @@ export const MazeProvider: React.FC<{ children: React.ReactNode }> = ({ children
     wallColor: "#000000",
     backgroundColor: "#ffffff",
     text: "MAZE",
-    letterDistance: 5
+    letterDistance: 5,
+    letterSize: 5
   });
 
   const [solverSettings, setSolverSettings] = useState<SolverSettings>({
@@ -166,7 +168,7 @@ export const MazeProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } catch (error) {
       console.error('Error during maze solving:', error);
     }
-  }, [solveWithAnimation, handlePathUpdate, isSolving, abortSolving, setIsSolutionShown]);
+  }, [solveWithAnimation, handlePathUpdate, isSolving, abortSolving, isSolutionShown, setIsSolutionShown]);
 
 
   const exportMaze = useCallback(() => {
@@ -197,6 +199,8 @@ export const MazeProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setAppearanceSettings,
     solverSettings,
     updateSolverSettings,
+    letterCells,
+    setLetterCells,
 
     // Actions
     generateMaze,

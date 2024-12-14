@@ -2,6 +2,7 @@ import { useCallback } from 'react';
 import { Cell, FrameType, Position } from '../utils/types';
 import { drawLine, drawArrow, getArrowPadding } from '../utils/helpers/drawing';
 import { isPointInPolygon, getPolygonPoints, distanceToLineSegment } from '../utils/helpers/geometryHelpers';
+// import { getLetterPixels } from './../utils/helpers/drawing'
 
 export const useMazeDrawing = () => {
 
@@ -20,6 +21,7 @@ export const useMazeDrawing = () => {
       showArrows: boolean;
       solutionColor: string;
       solutionPath?: Position[];
+      text: string;
     }
   ) => {
 
@@ -402,89 +404,74 @@ export const useMazeDrawing = () => {
     const drawTextMaze = (
       ctx: CanvasRenderingContext2D,
       maze: Cell[][],
-      columns: number,
-      cellSize: number,
-      wallColor: string,
-      wallThickness: number,
-      showArrows: boolean,
-      text: string,
-      solutionColor: string,
-      backgroundColor: string
+      options: {
+        rows: number;
+        columns: number;
+        cellSize: number;
+        wallColor: string;
+        backgroundColor: string;
+        wallThickness: number;
+        solutionColor: string;
+        showArrows: boolean;
+        text: string;
+      }
     ) => {
-      // Get text pixels for reference
-      const pixels = getLetterPixels(text, { width: 400, height: 100 });
+      console.log("drawomgmazw")
+      const { cellSize, wallColor, wallThickness } = options;
+      const pixels = getLetterPixels(options.text, { width: Math.max(10, 50 * options.text.length), height: options.rows });
 
-      // Draw the cells first
-      for (let row = 0; row < maze.length; row++) {
-        for (let col = 0; col < maze[row].length; col++) {
-          const cell = maze[row][col];
-          const x = col * cellSize;
-          const y = row * cellSize;
+      // Draw walls
+      Array.from({ length: options.rows + 1 }, (_, y) =>
+        Array.from({ length: options.columns + 1 }, (_, x) => {
+          const shouldDrawHorizontal = y < options.rows && shouldShowWall(x, y, true, pixels);
+          const shouldDrawVertical = x < options.columns && shouldShowWall(x, y, false, pixels);
 
-          // Only draw cells that are part of the text
-          if (pixels.has(`${col},${row}`)) {
-            // Fill cell background
-            ctx.fillStyle = cell.isSolution ? solutionColor : backgroundColor;
-            ctx.fillRect(x, y, cellSize, cellSize);
+          ctx.strokeStyle = wallColor;
+          ctx.lineWidth = wallThickness;
+
+          if (shouldDrawHorizontal && maze[y]?.[x]?.northWall) {
+            ctx.beginPath();
+            ctx.moveTo(x * cellSize, y * cellSize);
+            ctx.lineTo((x + 1) * cellSize, y * cellSize);
+            ctx.stroke();
           }
-        }
-      }
 
-      // Then draw the walls
-      for (let row = 0; row < maze.length; row++) {
-        for (let col = 0; col < maze[row].length; col++) {
-          const cell = maze[row][col];
-          const x = col * cellSize;
-          const y = row * cellSize;
-
-          // Only draw walls for cells that are part of the text
-          if (pixels.has(`${col},${row}`)) {
-            ctx.strokeStyle = wallColor;
-            ctx.lineWidth = wallThickness;
-
-            if (cell.northWall) drawLine(ctx, x, y, x + cellSize, y);
-            if (cell.eastWall) drawLine(ctx, x + cellSize, y, x + cellSize, y + cellSize);
-            if (cell.southWall) drawLine(ctx, x, y + cellSize, x + cellSize, y + cellSize);
-            if (cell.westWall) drawLine(ctx, x, y, x, y + cellSize);
+          if (shouldDrawVertical && maze[y]?.[x]?.westWall) {
+            ctx.beginPath();
+            ctx.moveTo(x * cellSize, y * cellSize);
+            ctx.lineTo(x * cellSize, (y + 1) * cellSize);
+            ctx.stroke();
           }
-        }
-      }
+        })
+      );
 
-      // Draw entrance/exit arrows if enabled
-      if (showArrows) {
-        // Find entrance and exit positions
-        for (let row = 0; row < maze.length; row++) {
-          for (let col = 0; col < maze[row].length; col++) {
-            const cell = maze[row][col];
-            if (cell.isEntrance) {
-              // Draw entrance arrow on the left
-              drawArrow(
-                ctx,
-                -cellSize * 2,
-                row * cellSize + cellSize / 2,
-                0,
-                row * cellSize + cellSize / 2,
-                wallColor
-              );
-            }
-            if (cell.isExit) {
-              // Draw exit arrow on the right
-              const mazeWidth = columns * cellSize;
-              drawArrow(
-                ctx,
-                mazeWidth,
-                row * cellSize + cellSize / 2,
-                mazeWidth + cellSize * 2,
-                row * cellSize + cellSize / 2,
-                wallColor
-              );
-            }
-          }
-        }
+      // // Draw solution path if it exists
+      // if (options.solutionPath?.length) {
+      //   ctx.strokeStyle = options.solutionColor;
+      //   ctx.lineWidth = cellSize / 3;
+      //   ctx.lineCap = 'round';
+      //   ctx.lineJoin = 'round';
+
+      //   ctx.beginPath();
+      //   options.solutionPath.forEach((pos, index) => {
+      //     const x = (pos.col + 0.5) * cellSize;
+      //     const y = (pos.row + 0.5) * cellSize;
+      //     if (index === 0) ctx.moveTo(x, y);
+      //     else ctx.lineTo(x, y);
+      //   });
+      //   ctx.stroke();
+      // }
+    };
+
+    const shouldShowWall = (x: number, y: number, isHorizontal: boolean, pixels: Set<string>) => {
+      if (isHorizontal) {
+        return pixels.has(`${x},${y}`) || (y > 0 && pixels.has(`${x},${y - 1}`));
+      } else {
+        return pixels.has(`${x},${y}`) || (x > 0 && pixels.has(`${x - 1},${y}`));
       }
     };
 
-    const getLetterPixels = (text: string, dimensions: { width: number, height: number }) => {
+    const getLetterPixels = (text: string, dimensions: { width: number; height: number }) => {
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
       if (!ctx) return new Set<string>();
@@ -500,10 +487,8 @@ export const useMazeDrawing = () => {
       const letterWidths = text.split('').map(l => ctx.measureText(l).width);
       // const totalWidth = letterWidths.reduce((a, b) => a + b, 0);
       const spacing = -fontSize * 0.08;
+      const baseX = fontSize;
 
-      const baseX = dimensions.width * 0.1; // Add some padding on the left
-
-      // Draw text
       text.split('').forEach((letter, i) => {
         const x = baseX + letterWidths.slice(0, i).reduce((a, b) => a + b, 0) + spacing * i;
         ctx.fillStyle = 'black';
@@ -511,7 +496,6 @@ export const useMazeDrawing = () => {
         ctx.fillText(letter, x, dimensions.height / 2);
       });
 
-      // Convert to pixel set
       const pixels = new Set<string>();
       const imageData = ctx.getImageData(0, 0, dimensions.width, dimensions.height);
       for (let y = 0; y < dimensions.height; y++) {
@@ -524,7 +508,7 @@ export const useMazeDrawing = () => {
       return pixels;
     };
 
-    const { rows, columns, sides, cellSize, wallColor, backgroundColor, wallThickness, solutionColor, solutionPath, showArrows } = options;
+    const { rows, columns, sides, cellSize, wallColor, backgroundColor, wallThickness, showArrows, solutionColor, solutionPath, text } = options;
     const arrowPadding = getArrowPadding(cellSize);
 
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
@@ -543,7 +527,17 @@ export const useMazeDrawing = () => {
         drawPolygonMaze(ctx, maze, rows, columns, sides, cellSize, wallColor, showArrows);
         break;
       case 'text':
-        drawTextMaze(ctx, maze, columns, cellSize, wallColor, wallThickness, showArrows, "MAZE", "#00FF00", backgroundColor);
+        drawTextMaze(ctx, maze, {
+          rows,
+          columns,
+          cellSize,
+          wallColor,
+          backgroundColor,
+          wallThickness,
+          solutionColor,
+          showArrows,
+          text
+        });
         break;
       default:
         drawSquareMaze(ctx, maze, rows, columns, cellSize, solutionColor, wallColor, showArrows);

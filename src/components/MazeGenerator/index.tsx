@@ -51,7 +51,7 @@ const MazeGenerator: React.FC = () => {
     if (appearanceSettings) {
       generateMaze();
     }
-  }, [appearanceSettings.rows, appearanceSettings.columns, appearanceSettings.polygonSides]);
+  }, [appearanceSettings.rows, appearanceSettings.columns, appearanceSettings.polygonSides, appearanceSettings, generateMaze]);
 
   const handleSolverSettingChange = (setting: keyof SolverSettings, value: any) => {
     updateSolverSettings({ [setting]: value });
@@ -98,6 +98,7 @@ const MazeGenerator: React.FC = () => {
             showArrows={appearanceSettings.showArrows}
             sides={appearanceSettings.polygonSides}
             solutionPath={solutionPath}
+            text={appearanceSettings.text}
           />
         </div>
       </div>

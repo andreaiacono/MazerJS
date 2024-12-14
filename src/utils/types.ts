@@ -16,6 +16,12 @@ export interface Cell {
   radialWall?: boolean;
 }
 
+export type Wall = { 
+  x: number; 
+  y: number; 
+  isHorizontal: boolean 
+};
+
 export interface MazeSettings {
   horizontalBias: number;
   branchingProbability: number;
@@ -38,6 +44,7 @@ export interface AppearanceSettings {
   backgroundColor: string;
   text: string;
   letterDistance: number;
+  letterSize: number;
 }
 
 export interface SolverSettings {

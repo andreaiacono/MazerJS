@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { Cell, MazeSettings, Position, FrameType, MazeAlgorithm } from '../utils/types';
+import { Cell, MazeSettings, Position, FrameType, MazeAlgorithm, Wall } from '../utils/types';
 import {
   binaryMaze,
   sidewinderMaze,
@@ -9,8 +9,8 @@ import {
   huntAndKill
 } from '../utils/mazeAlgorithms';
 import { isPointInPolygon, getPolygonPoints, distanceToLineSegment } from '../utils/helpers/geometryHelpers';
-import { CELLS_PER_LETTER } from '../utils/constants';
-import { manhattanDistance } from '@/utils/helpers/pathfinding';
+import { manhattanDistance } from '../utils/helpers/pathfinding';
+import { getLetterPixels } from './../utils/helpers/drawing'
 
 export const useMazeGeneration = (
   frameType: FrameType,
@@ -20,7 +20,8 @@ export const useMazeGeneration = (
   mazeSettings: MazeSettings,
   text: string,
   polygonSides: number,
-  cellSize: number
+  cellSize: number,
+  setLetterCells: (cells: Set<string>) => void
 ) => {
   const [maze, setMaze] = useState<Cell[][]>([]);
 
@@ -95,28 +96,288 @@ export const useMazeGeneration = (
     setMaze(newMaze);
   }, [frameType, algorithm, rows, columns, mazeSettings, text, polygonSides, cellSize]);
 
-  const generateTextMaze = useCallback(() => {
-    // Implementation of text maze generation
-    // Similar to your existing text maze generation code
-  }, [text, rows]);
+  // const generateTextMaze = useCallback(() => {
+  //   if (!text) return;
 
-  const initializeMaze = (): Cell[][] => {
-    // Initialize maze with all walls
-    return Array(rows).fill(null).map(() =>
-      Array(columns).fill(null).map(() => ({
-        northWall: true,
-        southWall: true,
-        eastWall: true,
-        westWall: true,
-        visited: false,
-        isEntrance: false,
-        isExit: false,
-        isSolution: false,
-        circularWall: false,
-        radialWall: false
-      } as Cell))
-    );
-  };
+  //   // Calculate dimensions based on text length
+  //   const textDimensions = {
+  //     width: CELLS_PER_LETTER * Math.max(text.length, 1),
+  //     height: rows
+  //   };
+
+  //   // setColumns(textDimensions.width); // Update columns to match text width
+
+  //   // Initialize empty maze array
+  //   const newMaze: Cell[][] = Array(rows)
+  //     .fill(null)
+  //     .map(() => Array(textDimensions.width)
+  //       .fill(null)
+  //       .map(() => ({
+  //         northWall: true,
+  //         southWall: true,
+  //         eastWall: true,
+  //         westWall: true,
+  //         visited: false,
+  //         isEntrance: false,
+  //         isExit: false,
+  //         isSolution: false,
+  //         circularWall: false,
+  //         radialWall: false
+  //       }))
+  //     );
+
+  //   // Get pixels for the text
+  //   const pixels = getLetterPixels(text, textDimensions);
+
+  //   // Process each cell
+  //   for (let row = 0; row < rows; row++) {
+  //     for (let col = 0; col < textDimensions.width; col++) {
+  //       const isTextCell = pixels.has(`${col},${row}`);
+  //       newMaze[row][col].visited = !isTextCell; // Mark non-text cells as visited
+
+  //       if (isTextCell) {
+  //         // Remove walls between adjacent text cells
+  //         if (pixels.has(`${col},${row - 1}`)) newMaze[row][col].northWall = false;
+  //         if (pixels.has(`${col},${row + 1}`)) newMaze[row][col].southWall = false;
+  //         if (pixels.has(`${col - 1},${row}`)) newMaze[row][col].westWall = false;
+  //         if (pixels.has(`${col + 1},${row}`)) newMaze[row][col].eastWall = false;
+  //       }
+  //     }
+  //   }
+
+  //   // Find entrance and exit
+  //   let entranceY = Math.floor(rows / 2);
+  //   let exitY = Math.floor(rows / 2);
+  //   let entranceFound = false;
+  //   let exitFound = false;
+
+  //   // Find suitable entrance and exit points
+  //   for (let offset = 0; offset < Math.floor(rows / 2); offset++) {
+  //     const checkPositions = [
+  //       Math.floor(rows / 2) + offset,
+  //       Math.floor(rows / 2) - offset
+  //     ];
+
+  //     for (const y of checkPositions) {
+  //       if (y >= 0 && y < rows) {
+  //         if (!entranceFound && pixels.has(`0,${y}`)) {
+  //           entranceY = y;
+  //           entranceFound = true;
+  //         }
+  //         if (!exitFound && pixels.has(`${textDimensions.width - 1},${y}`)) {
+  //           exitY = y;
+  //           exitFound = true;
+  //         }
+  //       }
+  //     }
+
+  //     if (entranceFound && exitFound) break;
+  //   }
+
+  //   // Set entrance and exit
+  //   if (entranceFound) {
+  //     newMaze[entranceY][0].isEntrance = true;
+  //     newMaze[entranceY][0].westWall = false;
+  //   }
+  //   if (exitFound) {
+  //     newMaze[exitY][textDimensions.width - 1].isExit = true;
+  //     newMaze[exitY][textDimensions.width - 1].eastWall = false;
+  //   }
+
+  //   setMaze(newMaze);
+  // }, [text, rows]);
+
+  // const generateTextMaze = useCallback(() => {
+
+  //   const CELLS_PER_LETTER = 80;
+  //   const FIXED_HEIGHT = 160;
+
+  //   // Calculate dimensions based on text length
+  //   const dimensions = {
+  //     width: CELLS_PER_LETTER * Math.max(text.length, 1),
+  //     height: FIXED_HEIGHT
+  //   };
+
+  //   const initializeWalls = () => {
+  //     const newWalls = new Set<string>();
+  //     for (let y = 0; y <= dimensions.height; y++) {
+  //       for (let x = 0; x <= dimensions.width; x++) {
+  //         if (x < dimensions.width) newWalls.add(`${x},${y},true`);
+  //         if (y < dimensions.height) newWalls.add(`${x},${y},false`);
+  //       }
+  //     }
+  //     return newWalls;
+  //   };
+
+  //   const getNeighbors = (cell: Position): Array<[Position, Wall]> => {
+  //     const neighbors: Array<[Position, Wall]> = [];
+  //     if (cell.col > 0) neighbors.push([{ row: cell.row, col: cell.col - 1 }, { x: cell.row, y: cell.col, isHorizontal: true }]);
+  //     if (cell.col < dimensions.height - 1) neighbors.push([{ row: cell.row,col: cell.col + 1 }, { x: cell.row, y: cell.col + 1, isHorizontal: true }]);
+  //     if (cell.row > 0) neighbors.push([{ row: cell.row - 1, y: cell.y }, { x: cell.row, y: cell.col, isHorizontal: false }]);
+  //     if (cell.row < dimensions.width - 1) neighbors.push([{ row: cell.row + 1, col: cell.col }, { x: cell.row + 1, y: cell.col, isHorizontal: false }]);
+  //     return neighbors;
+  //   };
+
+  //   const ensureConnectivity = (walls: Set<string>, pixels: Set<string>) => {
+  //     const visited = new Set<string>();
+  //     const components: Set<string>[] = [];
+  
+  //     for (const pixel of pixels) {
+  //       if (visited.has(pixel)) continue;
+  
+  //       const component = new Set<string>();
+  //       const stack = [pixel];
+  
+  //       while (stack.length > 0) {
+  //         const current = stack.pop()!;
+  //         if (visited.has(current)) continue;
+  
+  //         visited.add(current);
+  //         component.add(current);
+  
+  //         const [row, col] = current.split(',').map(Number);
+  //         getNeighbors({ row, col }).forEach(([neighbor, wall]) => {
+  //           const key = `${neighbor.row},${neighbor.col}`;
+  //           if (pixels.has(key) && !walls.has(`${wall.x},${wall.y},${wall.isHorizontal}`)) {
+  //             stack.push(key);
+  //           }
+  //         });
+  //       }
+  
+  //       if (component.size > 0) {
+  //         components.push(component);
+  //       }
+  //     }
+  
+  //     for (let i = 0; i < components.length - 1; i++) {
+  //       let minDist = Infinity;
+  //       let bestWall: Wall | null = null;
+  
+  //       for (const cell1 of components[i]) {
+  //         const [x1, y1] = cell1.split(',').map(Number);
+  
+  //         for (const cell2 of components[i + 1]) {
+  //           const [x2, y2] = cell2.split(',').map(Number);
+  //           const dist = Math.abs(x2 - x1) + Math.abs(y2 - y1);
+  
+  //           if (dist < minDist) {
+  //             const neighbors = getNeighbors({ row: x1, col: y1 });
+  //             for (const [neighbor, wall] of neighbors) {
+  //               const key = `${neighbor.row},${neighbor.col}`;
+  //               if (components[i + 1].has(key)) {
+  //                 minDist = dist;
+  //                 bestWall = wall;
+  //               }
+  //             }
+  //           }
+  //         }
+  //       }
+  
+  //       if (bestWall) {
+  //         walls.delete(`${bestWall.x},${bestWall.y},${bestWall.isHorizontal}`);
+  //       }
+  //     }
+  //   };
+
+  //   const findEntranceExit = (pixels: Set<string>) => {
+  //     const minX = 0;
+  //     const maxX = dimensions.width - 1;
+  //     const middleY = Math.floor(dimensions.height / 2);
+
+  //     // Find entrance (leftmost pixel)
+  //     let entrance: Position | undefined;
+  //     for (let offset = 0; offset < dimensions.height; offset++) {
+  //       for (const col of [middleY + offset, middleY - offset]) {
+  //         if (col < 0 || col >= dimensions.height) continue;
+  //         if (pixels.has(`${minX + 1},${col}`)) {
+  //           entrance = { row: minX + 1, col };
+  //           break;
+  //         }
+  //       }
+  //       if (entrance) break;
+  //     }
+
+  //     // Find exit (rightmost pixel)
+  //     let exit: Position | undefined;
+  //     for (let offset = 0; offset < dimensions.height; offset++) {
+  //       for (const col of [middleY + offset, middleY - offset]) {
+  //         if (col < 0 || col >= dimensions.height) continue;
+  //         if (pixels.has(`${maxX - 1},${col}`)) {
+  //           exit = { row: maxX - 1, col };
+  //           break;
+  //         }
+  //       }
+  //       if (exit) break;
+  //     }
+
+  //     return { entrance: entrance!, exit: exit! };
+  //   };
+
+
+  //   const pixels = getLetterPixels(text, dimensions);
+  //   setLetterCells(pixels);
+
+  //   const walls = initializeWalls();
+  //   const visited = new Set<string>();
+
+  //   const { entrance, exit } = findEntranceExit(pixels);
+  //   if (!entrance || !exit) {
+  //     return;
+  //   }
+
+  //   const stack: Position[] = [entrance];
+  //   visited.add(`${entrance.row},${entrance.col}`);
+
+  //   walls.delete(`${entrance.row},${entrance.col},false`);
+  //   walls.delete(`${entrance.row - 1},${entrance.y},false`);
+  //   walls.delete(`${exit.row + 1},${exit.col},false`);
+  //   walls.delete(`${exit.row + 2},${exit.col},false`);
+
+  //   const processChunk = () => {
+  //     while (stack.length > 0) {
+  //       const current = stack[stack.length - 1];
+  //       const neighbors = getNeighbors(current)
+  //         .filter(([neighbor]) => {
+  //           const key = `${neighbor.row},${neighbor.col}`;
+  //           return pixels.has(key) && !visited.has(key);
+  //         });
+
+  //       if (neighbors.length === 0) {
+  //         stack.pop();
+  //         continue;
+  //       }
+
+  //       const [neighbor, wall] = neighbors[Math.floor(Math.random() * neighbors.length)];
+  //       visited.add(`${neighbor.row},${neighbor.col}`);
+  //       walls.delete(`${wall.x},${wall.y},${wall.isHorizontal}`);
+  //       stack.push(neighbor);
+  //     }
+
+  //     ensureConnectivity(walls, pixels);
+  //     return walls;
+  //   };
+
+  //   return processChunk();
+  // }, [text, setLetterCells]);
+
+
+  // const initializeMaze = (): Cell[][] => {
+  //   // Initialize maze with all walls
+  //   return Array(rows).fill(null).map(() =>
+  //     Array(columns).fill(null).map(() => ({
+  //       northWall: true,
+  //       southWall: true,
+  //       eastWall: true,
+  //       westWall: true,
+  //       visited: false,
+  //       isEntrance: false,
+  //       isExit: false,
+  //       isSolution: false,
+  //       circularWall: false,
+  //       radialWall: false
+  //     } as Cell))
+  //   );
+  // };
 
   const adjustCellsToCircular = (
     maze: Cell[][],
@@ -306,7 +567,6 @@ export const useMazeGeneration = (
     return newMaze;
   };
 
-  // Helper function to verify if a path exists
   const verifyPath = (
     maze: Cell[][],
     start: Position,
@@ -336,7 +596,6 @@ export const useMazeGeneration = (
     return false;
   };
 
-  // Helper function to find shortest path using A*
   const findShortestPath = (
     maze: Cell[][],
     start: Position,
@@ -416,7 +675,6 @@ export const useMazeGeneration = (
     return neighbors;
   };
 
-
   const getLowestFScore = (openSet: Set<string>, fScore: Map<string, number>): Position => {
     let lowest = Infinity;
     let lowestPos: Position | null = null;
@@ -433,8 +691,6 @@ export const useMazeGeneration = (
     return lowestPos!;
   };
 
-
-  // Helper function to create a path between entrance and exit
   const createPath = (
     maze: Cell[][],
     start: Position,

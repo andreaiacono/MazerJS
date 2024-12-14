@@ -16,6 +16,7 @@ interface CanvasProps {
   showArrows: boolean;
   sides: number;
   solutionPath?: Position[];
+  text: string;
 }
 
 export const Canvas: React.FC<CanvasProps> = ({
@@ -30,7 +31,8 @@ export const Canvas: React.FC<CanvasProps> = ({
   solutionColor,
   showArrows,
   sides,
-  solutionPath
+  solutionPath,
+  text
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { drawMaze } = useMazeDrawing();
@@ -66,10 +68,11 @@ export const Canvas: React.FC<CanvasProps> = ({
       wallThickness,
       showArrows,
       solutionColor,
-      solutionPath
+      solutionPath,
+      text
     });
 
-  }, [maze, frameType, rows, columns, cellSize, wallColor, backgroundColor, wallThickness, showArrows, sides, solutionColor, drawMaze, solutionPath]);
+  }, [maze, frameType, rows, columns, cellSize, wallColor, backgroundColor, wallThickness, showArrows, sides, solutionColor, drawMaze, solutionPath, text]);
 
   const arrowPadding = getArrowPadding(cellSize);
 
