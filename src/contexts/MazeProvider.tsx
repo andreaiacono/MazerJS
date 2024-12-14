@@ -138,7 +138,16 @@ export const MazeProvider: React.FC<{ children: React.ReactNode }> = ({ children
     );
 
     setMaze(newMaze);
-  }, [algorithm, appearanceSettings, mazeSettings, frameType, abortSolving]);
+  }, [
+    algorithm,
+    frameType,
+    abortSolving,
+    // Only include the appearance settings that affect maze structure
+    appearanceSettings.rows,
+    appearanceSettings.columns,
+    appearanceSettings.polygonSides,
+    mazeSettings
+  ]);
 
   const showSolution = useCallback(async () => {
     if (isSolutionShown) {

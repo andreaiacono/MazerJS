@@ -100,11 +100,9 @@ export const AppearanceSection: React.FC<AppearanceSectionProps> = ({
           <div className="flex items-center space-x-2">
             <Checkbox
               checked={settings.showArrows}
-              onCheckedChange={(checked: boolean) => onSettingChange('showArrows', checked)}
+              label="Show Entrance/Exit Arrows"
+              onChange={(checked: boolean) => onSettingChange('showArrows', checked)}
             />
-            <label htmlFor="show-arrows" className="text-sm font-medium leading-none">
-              Show Entrance/Exit Arrows
-            </label>
           </div>
 
           <div className="flex gap-4 items-center">

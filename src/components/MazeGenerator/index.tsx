@@ -4,6 +4,7 @@ import { Controls } from './Controls';
 import { ActionButtons } from './ActionButtons';
 import { Canvas } from './Canvas';
 import { MazeSettings, AppearanceSettings, SolverSettings } from '../../utils/types';
+import { drawArrow } from '@/utils/helpers/drawing';
 // import { useEffect } from 'react';
 
 const MazeGenerator: React.FC = () => {
@@ -45,13 +46,25 @@ const MazeGenerator: React.FC = () => {
       ...prev,
       [setting]: value
     }));
-  };
 
-  useEffect(() => {
-    if (appearanceSettings) {
+    // Only regenerate maze for structural changes
+    if (['rows', 'columns', 'polygonSides'].includes(setting)) {
       generateMaze();
     }
-  }, [appearanceSettings.rows, appearanceSettings.columns, appearanceSettings.polygonSides, appearanceSettings, generateMaze]);
+  };
+
+
+
+  useEffect(() => {
+    // Force a redraw without regenerating the maze
+    // The Canvas component will handle this automatically
+  }, [
+    appearanceSettings.showArrows,
+    appearanceSettings.wallColor,
+    appearanceSettings.backgroundColor,
+    appearanceSettings.wallThickness,
+    appearanceSettings.cellSize
+  ]);
 
   const handleSolverSettingChange = (setting: keyof SolverSettings, value: any) => {
     updateSolverSettings({ [setting]: value });
