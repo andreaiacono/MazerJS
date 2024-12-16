@@ -34,31 +34,6 @@ export const NumberSlider = ({
           lastValidValueRef.current = newValue;
           onChange(newValue, { label });
         }}
-        onMouseDown={(startEvent) => {
-          const slider = startEvent.target as HTMLInputElement;
-          const sliderRect = slider.getBoundingClientRect();
-          
-          const handleMouseMove = (e: MouseEvent) => {
-            const percent = Math.min(Math.max((e.clientX - sliderRect.left) / sliderRect.width, 0), 1);
-            const newValue = Math.round((min + percent * (max - min)) / step) * step;
-    
-            if (e.clientX >= sliderRect.left && e.clientX <= sliderRect.right) {
-              lastValidValueRef.current = newValue;
-              onChange(newValue, { label });
-            } else {
-              // onChange(lastValidValueRef.current, { label });
-            }
-          };
-          
-          const handleMouseUp = () => {
-            window.removeEventListener('mousemove', handleMouseMove);
-            window.removeEventListener('mouseup', handleMouseUp);
-            onChangeEnd?.();
-          };
-          
-          window.addEventListener('mousemove', handleMouseMove);
-          window.addEventListener('mouseup', handleMouseUp);
-        }}
         min={min}
         max={max}
         step={step}
