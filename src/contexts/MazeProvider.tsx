@@ -9,18 +9,8 @@ import {
   AppearanceSettings,
   SolverSettings
 } from '../utils/types';
-import { addEntranceAndExit, applySymmetry } from '../utils/mazeAlgorithms/utils';
-import {
-  binaryMaze,
-  sidewinderMaze,
-  recursiveBacktracker,
-  primsAlgorithm,
-  recursiveDivision,
-  huntAndKill
-} from '../utils/mazeAlgorithms';
 import { useMazeSolving } from '../hooks/useMazeSolving';
-
-
+import { useMazeGeneration } from '../hooks/useMazeGeneration';  // Add this import
 
 export const MazeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // Core maze state
@@ -73,81 +63,28 @@ export const MazeProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setSolutionPath(path);
   }, []);
 
+  // Use the custom hook
+  const { generateMaze: generateMazeFromHook } = useMazeGeneration(
+    frameType,
+    algorithm,
+    appearanceSettings.rows,
+    appearanceSettings.columns,
+    mazeSettings,
+    appearanceSettings.text,
+    appearanceSettings.polygonSides,
+    appearanceSettings.cellSize,
+    setLetterCells
+  );
 
   const generateMaze = useCallback(() => {
-
     abortSolving();
     setSolutionPath([]);
     setSolverSettings(prev => ({ ...prev, isSolving: false }));
-
-
-    const algorithmMap = {
-      'binary': () => binaryMaze(
-        appearanceSettings.rows,
-        appearanceSettings.columns,
-        mazeSettings.horizontalBias
-      ),
-      'sidewinder': () => sidewinderMaze(
-        appearanceSettings.rows,
-        appearanceSettings.columns,
-        mazeSettings.horizontalBias,
-        mazeSettings.branchingProbability
-      ),
-      'recursive-backtracker': () => recursiveBacktracker(
-        appearanceSettings.rows,
-        appearanceSettings.columns,
-        mazeSettings.branchingProbability,
-        mazeSettings.deadEndDensity
-      ),
-      'prims': () => primsAlgorithm(
-        appearanceSettings.rows,
-        appearanceSettings.columns,
-        mazeSettings.branchingProbability
-      ),
-      'recursive-division': () => recursiveDivision(
-        appearanceSettings.rows,
-        appearanceSettings.columns,
-        mazeSettings.horizontalBias
-      ),
-      'hunt-and-kill': () => huntAndKill(
-        appearanceSettings.rows,
-        appearanceSettings.columns,
-        mazeSettings.branchingProbability,
-        mazeSettings.deadEndDensity
-      )
-    };
-
-    let newMaze = algorithmMap[algorithm]?.() ||
-      binaryMaze(appearanceSettings.rows, appearanceSettings.columns, 0.5);
-
-    if (mazeSettings.symmetry !== 'none') {
-      newMaze = applySymmetry(
-        newMaze,
-        appearanceSettings.rows,
-        appearanceSettings.columns,
-        mazeSettings.symmetry
-      );
-    }
-
-    newMaze = addEntranceAndExit(
-      newMaze,
-      appearanceSettings.rows,
-      appearanceSettings.columns,
-      mazeSettings,
-      frameType
-    );
-
+    
+    const newMaze = generateMazeFromHook();
     setMaze(newMaze);
-  }, [
-    algorithm,
-    frameType,
-    abortSolving,
-    // Only include the appearance settings that affect maze structure
-    appearanceSettings.rows,
-    appearanceSettings.columns,
-    appearanceSettings.polygonSides,
-    mazeSettings
-  ]);
+  }, [generateMazeFromHook, abortSolving]);
+
 
   const showSolution = useCallback(async () => {
     if (isSolutionShown) {
@@ -187,8 +124,6 @@ export const MazeProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const updateSolverSettings = (updates: Partial<SolverSettings>) => {
     setSolverSettings(prev => ({ ...prev, ...updates }));
   };
-
-  // const { drawMaze } = useMazeDrawing();
 
   const contextValue = {
     // Core state

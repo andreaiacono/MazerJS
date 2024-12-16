@@ -31,11 +31,11 @@ export const GenerationSection: React.FC<GenerationSectionProps> = ({
       { key: 'branchingProbability', label: 'Branching Probability (%)', min: 1, max: 100 }
     ],
     'recursive-backtracker': [
-      { key: 'branchingProbability', label: 'Branching Probability (%)', min: 1, max: 100 },
+      { key: 'branchingProbability', label: 'Branching Probability (%)', min: 40, max: 100 },
       { key: 'deadEndDensity', label: 'Dead End Density (%)', min: 0, max: 100 }
     ],
     'prims': [
-      { key: 'branchingProbability', label: 'Branching Probability (%)', min: 1, max: 100 }
+      { key: 'branchingProbability', label: 'Branching Probability (%)', min: 50, max: 100 }
     ],
     'recursive-division': [
       { key: 'horizontalBias', label: 'Horizontal Bias (%)', min: 0, max: 100 }

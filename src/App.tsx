@@ -3,7 +3,6 @@ import { MazeProvider } from './contexts/MazeProvider';
 import MazeGenerator from './components/MazeGenerator';
 
 const App: React.FC = () => {
-  console.log("App rendering");
   return (
     <MazeProvider>
       <div className="debug-app">

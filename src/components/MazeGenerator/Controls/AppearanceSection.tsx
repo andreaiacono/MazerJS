@@ -44,7 +44,6 @@ export const AppearanceSection: React.FC<AppearanceSectionProps> = ({
     text: [
       { key: 'letterSize', label: "Letter Size", value: settings.letterSize, min: 5, max: 20 },
       { key: 'letterDistance', label: "Letter Distance", value: settings.letterDistance, min: 5, max: 20 },
-      { key: 'letterSize', label: "Letter Size", value: settings.letterSize, min: 5, max: 20 },
       { key: 'cellSize', label: "Maze Size", value: settings.cellSize, min: 2, max: 80 },
       { key: 'wallThickness', label: "Wall thickness", value: settings.wallThickness, min: 1, max: 10 }
     ]
@@ -79,8 +78,6 @@ export const AppearanceSection: React.FC<AppearanceSectionProps> = ({
               onChange={(value, sliderInfo) => {
                 onSettingChange(config.key as keyof AppearanceSettings, value);
               }}
-              // onChangeEnd={() => {
-              // }}
               min={config.min ?? 5}
               max={config.max ?? 80}
               step={1}

@@ -5,33 +5,24 @@ export const FIXED_HEIGHT = 60;
 
 export const algorithmPresets = {
     'binary': {
-      horizontalBias: 75,
-      branchingProbability: 70,
-      deadEndDensity: 80
+      horizontalBias: 50,
     },
     'sidewinder': {
-      horizontalBias: 65,
-      branchingProbability: 70,
-      deadEndDensity: 50
+      horizontalBias: 50,
+      branchingProbability: 80,
     },
     'recursive-backtracker': {
-      horizontalBias: 50,
       branchingProbability: 85,
       deadEndDensity: 30
     },
     'prims': {
-      horizontalBias: 50,
-      branchingProbability: 80,
-      deadEndDensity: 50
+      branchingProbability: 95,
     },
     'recursive-division': {
-      horizontalBias: 70,
-      branchingProbability: 50,
-      deadEndDensity: 50
+      horizontalBias: 50,
     },
     'hunt-and-kill': {
-      horizontalBias: 50,
-      branchingProbability: 75,
+      horizontalBias: 80,
       deadEndDensity: 40
     }
   }

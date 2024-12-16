@@ -77,6 +77,7 @@ export const useMazeDrawing = () => {
       wallThickness: number,
       showArrows: boolean
     ) => {
+
       if (!maze || maze.length === 0 || !maze[0]) return;
 
       // Use fixed canvas size of 20 cells for positioning
@@ -141,7 +142,8 @@ export const useMazeDrawing = () => {
 
         // Check if this sector contains entrance or exit
         const cell = maze[rings - 1][sector];
-        if (cell && (cell.isEntrance || cell.isExit)) {
+
+        if (cell.isEntrance || cell.isExit) {
           // Draw the boundary with a gap
           const gapSize = Math.PI / (3 * sectors);
           const midAngle = (startAngle + endAngle) / 2;
@@ -420,7 +422,6 @@ export const useMazeDrawing = () => {
         text: string;
       }
     ) => {
-      console.log("drawomgmazw")
       const { cellSize, wallColor, wallThickness } = options;
       const pixels = getLetterPixels(options.text, { width: Math.max(10, 50 * options.text.length), height: options.rows });
 
@@ -559,7 +560,7 @@ export const useMazeDrawing = () => {
           const centerY = fixedSize / 2;
 
           const rings = maze.length;
-          const sectors = maze[0].length;
+          // const sectors = maze[0].length;
           const maxRadius = Math.min(centerX, centerY) * 0.8;
           const ringWidth = maxRadius / (rings + 1);
 

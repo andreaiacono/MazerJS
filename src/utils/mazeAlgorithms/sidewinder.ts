@@ -7,7 +7,11 @@ export const sidewinderMaze = (
   horizontalBias: number,
   branchingProbability: number
 ): Cell[][] => {
-  horizontalBias /=100
+
+
+  branchingProbability /= 100
+  horizontalBias /= 100
+
   const grid = createEmptyGrid(rows, columns);
 
   for (let row = 0; row < rows; row++) {

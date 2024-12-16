@@ -7,7 +7,10 @@ export const createEmptyGrid = (rows: number, columns: number): Cell[][] => {
       southWall: true,
       eastWall: true,
       westWall: true,
-      visited: false
+      visited: false,
+      isEntrance: false, 
+      isExit: false,
+      isSolution: false
     }))
   );
 };

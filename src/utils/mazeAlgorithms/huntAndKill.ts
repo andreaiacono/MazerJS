@@ -1,4 +1,5 @@
 import { Cell, Position } from '../types';
+import { createEmptyGrid } from './utils';
 
 export const huntAndKill = (
   rows: number,
@@ -6,16 +7,12 @@ export const huntAndKill = (
   branchingProbability: number,
   deadEndDensity: number
 ): Cell[][] => {
+
+  branchingProbability /= 100
+  deadEndDensity /= 100
+
   // Initialize maze with all walls
-  const maze: Cell[][] = Array(rows).fill(null).map(() =>
-    Array(columns).fill(null).map(() => ({
-      northWall: true,
-      southWall: true,
-      eastWall: true,
-      westWall: true,
-      visited: false
-    }))
-  );
+  const maze = createEmptyGrid(rows, columns);
 
   let current: Position | null = { row: 0, col: 0 };
   maze[0][0].visited = true;
@@ -74,7 +71,7 @@ const hunt = (
           const randomVisited = visitedNeighbors[
             Math.floor(Math.random() * visitedNeighbors.length)
           ];
-          
+
           removeWalls({ row, col }, randomVisited, maze);
           maze[row][col].visited = true;
           return { row, col };

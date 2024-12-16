@@ -6,6 +6,7 @@ export const binaryMaze = (
   columns: number, 
   horizontalBias: number
 ): Cell[][] => {
+
   horizontalBias /= 100
   const grid = createEmptyGrid(rows, columns);
 
