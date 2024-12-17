@@ -8,6 +8,7 @@ import { GenerationSection } from './GenerationSection';
 import { SolvingSection } from './SolvingSection';
 import { MazeSettings, FrameType, MazeAlgorithm, AppearanceSettings, SolverSettings } from '../../../utils/types';
 import { getAlgorithmDescription } from '../../../utils/constants';
+import { useMazeContext } from '../../../contexts/MazeContext';
 
 interface ControlsProps {
   isOpen: boolean;
@@ -38,6 +39,18 @@ export const Controls: React.FC<ControlsProps> = ({
   solverSettings,
   onSolverSettingChange,
 }) => {
+  const { generateMaze } = useMazeContext();
+
+  const handleFrameTypeChange = (newType: FrameType) => {
+    setFrameType(newType);
+    generateMaze();
+  };
+
+  const handleAlgorithmChange = (newAlgorithm: MazeAlgorithm) => {
+    setAlgorithm(newAlgorithm);
+    generateMaze();
+  };
+
   return (
     <div
       className={`
@@ -54,7 +67,7 @@ export const Controls: React.FC<ControlsProps> = ({
             <div className="flex flex-col gap-6">
               <div>
                 <label className="block mb-2 font-medium">Frame Type</label>
-                <Select value={frameType} onValueChange={setFrameType}>
+                <Select value={frameType} onValueChange={handleFrameTypeChange}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select frame type" />
                   </SelectTrigger>
@@ -69,7 +82,7 @@ export const Controls: React.FC<ControlsProps> = ({
 
               <div>
                 <label className="block mb-2 font-medium">Algorithm</label>
-                <Select value={algorithm} onValueChange={setAlgorithm}>
+                <Select value={algorithm} onValueChange={handleAlgorithmChange}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select algorithm" />
                   </SelectTrigger>
