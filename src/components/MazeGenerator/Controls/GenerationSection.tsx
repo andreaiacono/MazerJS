@@ -86,7 +86,7 @@ export const GenerationSection: React.FC<GenerationSectionProps> = ({
   return (
     <AccordionItem value="generation" className="border-t">
       <AccordionTrigger className="text-lg font-medium">
-        Maze Generation
+        Structure
       </AccordionTrigger>
       <AccordionContent>
         <div className="pt-4 space-y-4">
