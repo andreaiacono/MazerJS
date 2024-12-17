@@ -44,12 +44,12 @@ export const Controls: React.FC<ControlsProps> = ({
         fixed top-0 left-0 h-full bg-white shadow-lg
         transform transition-transform duration-300 ease-in-out
         ${isOpen ? 'translate-x-0' : '-translate-x-full'}
-        w-80 z-10 
+        w-80 z-10 flex flex-col
       `}
     >
-      <Card className="h-full">
-        <CardContent className="p-6 bg-background relative z-10">
-          <div className="space-y-6">
+      <Card className="h-full flex flex-col">
+        <CardContent className="p-6 bg-background relative z-10 flex-1 overflow-y-auto">
+          <div className="space-y-6 pb-4">
             {/* Basic Controls */}
             <div className="flex flex-col gap-6">
               <div>
@@ -118,15 +118,15 @@ export const Controls: React.FC<ControlsProps> = ({
       </Card>
 
       <button
-          className={`
-            absolute top-1/2 -translate-y-1/2
-            right-0 transform translate-x-full
-            bg-white rounded-r-lg p-2 shadow-md hover:bg-gray-50
-          `}
-          onClick={() => setIsOpen(!isOpen)}
-        >
-          {isOpen ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-        </button>
-  </div>
+        className={`
+          absolute top-1/2 -translate-y-1/2
+          right-0 transform translate-x-full
+          bg-white rounded-r-lg p-2 shadow-md hover:bg-gray-50
+        `}
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        {isOpen ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+      </button>
+    </div>
   );
 };
