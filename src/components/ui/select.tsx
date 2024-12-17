@@ -1,13 +1,10 @@
-// components/ui/select.tsx
 import * as React from "react"
 import * as SelectPrimitive from "@radix-ui/react-select"
-import { ChevronDown } from "lucide-react"
-import { cn } from "../../lib/utils"  // Changed from @/lib/utils
+import { ChevronDown, Check } from "lucide-react"
+import { cn } from "../../lib/utils"
 
 const Select = SelectPrimitive.Root
-
 const SelectGroup = SelectPrimitive.Group
-
 const SelectValue = SelectPrimitive.Value
 
 const SelectTrigger = React.forwardRef<
@@ -38,7 +35,7 @@ const SelectContent = React.forwardRef<
     <SelectPrimitive.Content
       ref={ref}
       className={cn(
-        "relative z-50 min-w-[8rem] overflow-hidden rounded-md border bg-white dark:bg-gray-800 text-popover-foreground shadow-md...",
+        "relative z-50 min-w-[8rem] overflow-hidden rounded-md border bg-white dark:bg-gray-800 text-popover-foreground shadow-md",
         position === "popper" &&
           "data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1",
         className
@@ -79,14 +76,21 @@ const SelectItem = React.forwardRef<
   <SelectPrimitive.Item
     ref={ref}
     className={cn(
-      "relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-2 pr-8 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+      "relative flex w-full select-none items-center rounded-sm py-1.5 pl-2 pr-8 text-sm outline-none",
+      "cursor-pointer",
+      "data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+      "hover:bg-blue-50 dark:hover:bg-blue-900/30", // Lighter hover state
+      "focus:bg-blue-50 dark:focus:bg-blue-900/30", // Matching focus state
+      "data-[state=checked]:bg-blue-100 dark:data-[state=checked]:bg-blue-800", // More distinct selected state
+      "data-[state=checked]:font-medium", // Making selected item slightly bolder
+      "transition-colors duration-150",
       className
     )}
     {...props}
   >
     <span className="absolute right-2 flex h-3.5 w-3.5 items-center justify-center">
       <SelectPrimitive.ItemIndicator>
-        <ChevronDown className="h-4 w-4" />
+        <Check className="h-4 w-4" /> {/* Changed from ChevronDown to Check for clearer selection indicator */}
       </SelectPrimitive.ItemIndicator>
     </span>
     <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>
