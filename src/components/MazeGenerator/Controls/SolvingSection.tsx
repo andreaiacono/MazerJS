@@ -34,7 +34,7 @@ export const SolvingSection: React.FC<SolvingSectionProps> = ({
             <Input
               type="color"
               value={settings.solutionColor}
-              onChange={(value) => onSettingChange('solutionColor', value)}
+              onChange={(e) => onSettingChange('solutionColor', e.target.value)}
               className="h-10 w-full"
             />
           </div>
