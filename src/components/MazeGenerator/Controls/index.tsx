@@ -1,14 +1,11 @@
 import React from 'react';
 import { ChevronRight, ChevronLeft } from 'lucide-react';
 import { Card, CardContent } from '../../ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select';
 import { Accordion } from '../../ui/accordion';
 import { AppearanceSection } from './AppearanceSection';
 import { GenerationSection } from './GenerationSection';
 import { SolvingSection } from './SolvingSection';
 import { MazeSettings, FrameType, MazeAlgorithm, AppearanceSettings, SolverSettings } from '../../../utils/types';
-import { getAlgorithmDescription } from '../../../utils/constants';
-import { useMazeContext } from '../../../contexts/MazeContext';
 
 interface ControlsProps {
   isOpen: boolean;
@@ -39,18 +36,6 @@ export const Controls: React.FC<ControlsProps> = ({
   solverSettings,
   onSolverSettingChange,
 }) => {
-  const { generateMaze } = useMazeContext();
-
-  const handleFrameTypeChange = (newType: FrameType) => {
-    setFrameType(newType);
-    generateMaze();
-  };
-
-  const handleAlgorithmChange = (newAlgorithm: MazeAlgorithm) => {
-    setAlgorithm(newAlgorithm);
-    generateMaze();
-  };
-
   return (
     <div
       className={`
@@ -63,63 +48,23 @@ export const Controls: React.FC<ControlsProps> = ({
       <Card className="h-full flex flex-col">
         <CardContent className="p-6 bg-background relative z-10 flex-1 overflow-y-auto">
           <div className="space-y-6 pb-4">
-            {/* Basic Controls */}
-            <div className="flex flex-col gap-6">
-              <div>
-                <label className="block mb-2 font-medium">Frame Type</label>
-                <Select value={frameType} onValueChange={handleFrameTypeChange}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select frame type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="square">Square/Rectangle</SelectItem>
-                    <SelectItem value="polygon">Polygon</SelectItem>
-                    <SelectItem value="circular">Circular</SelectItem>
-                    <SelectItem value="text">Text</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <label className="block mb-2 font-medium">Algorithm</label>
-                <Select value={algorithm} onValueChange={handleAlgorithmChange}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select algorithm" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="binary">Binary Tree</SelectItem>
-                    <SelectItem value="sidewinder">Sidewinder</SelectItem>
-                    <SelectItem value="recursive-backtracker">
-                      Recursive Backtracker (DFS)
-                    </SelectItem>
-                    <SelectItem value="prims">Prim's Algorithm</SelectItem>
-                    <SelectItem value="recursive-division">
-                      Recursive Division
-                    </SelectItem>
-                    <SelectItem value="hunt-and-kill">Hunt and Kill</SelectItem>
-                  </SelectContent>
-                </Select>
-                <div className="mt-2 text-sm text-gray-600 whitespace-pre-line">
-                  {getAlgorithmDescription(algorithm)}
-                </div>
-              </div>
-            </div>
-
             {/* Collapsible Sections */}
             <Accordion
               type="multiple"
               defaultValue={["appearance", "generation", "solving"]}
               className="space-y-4"
             >
-              <AppearanceSection
-                frameType={frameType}
-                settings={appearanceSettings}
-                onSettingChange={onAppearanceSettingChange}
-              />
               <GenerationSection
                 algorithm={algorithm}
+                setAlgorithm={setAlgorithm}
                 mazeSettings={mazeSettings}
                 onMazeSettingChange={onMazeSettingChange}
+              />
+              <AppearanceSection
+                frameType={frameType}
+                setFrameType={setFrameType}
+                settings={appearanceSettings}
+                onSettingChange={onAppearanceSettingChange}
               />
               <SolvingSection
                 settings={solverSettings}

@@ -3,30 +3,6 @@ import { MazeAlgorithm } from './types';
 export const CELLS_PER_LETTER = 50;
 export const FIXED_HEIGHT = 60;
 
-export const algorithmPresets = {
-    'binary': {
-      horizontalBias: 50,
-    },
-    'sidewinder': {
-      horizontalBias: 50,
-      branchingProbability: 80,
-    },
-    'recursive-backtracker': {
-      branchingProbability: 85,
-      deadEndDensity: 30
-    },
-    'prims': {
-      branchingProbability: 95,
-    },
-    'recursive-division': {
-      horizontalBias: 50,
-    },
-    'hunt-and-kill': {
-      horizontalBias: 80,
-      deadEndDensity: 40
-    }
-  }
-
 export const ALGORITHM_DESCRIPTIONS = {
   'binary': "Creates mazes with a clear bias toward paths moving down and right.\n\nAffected by: Horizontal Bias",
   'sidewinder': "Creates mazes with horizontal corridors and random vertical connections.\n\nAffected by: Horizontal Bias, Branching Probability",
