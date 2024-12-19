@@ -25,6 +25,9 @@ export const useMazeGeneration = (
 ) => {
 
   const generateMaze = useCallback(() => {
+
+    console.log("algorithm=" + algorithm)
+    console.log("frame=" + frameType)
     if (frameType === 'text') {
       return generateTextMaze();
     }
@@ -378,6 +381,7 @@ export const useMazeGeneration = (
     return newMaze;
   };
   
+
   const adjustCellsToCircular = (
     maze: Cell[][],
     rows: number,
@@ -438,20 +442,34 @@ export const useMazeGeneration = (
         // Map the walls
         circCell.northWall = rectCell.northWall;
         circCell.southWall = rectCell.southWall;
-        circCell.eastWall = rectCell.eastWall;
-        circCell.westWall = rectCell.westWall;
-  
-        // Handle sector wraparound
-        if (sector === sectors - 1) {
-          // Last sector connects to first sector
+        
+        // Handle east/west walls normally for non-wraparound case
+        if (sector < sectors - 1) {
           circCell.eastWall = rectCell.eastWall;
-          circularMaze[ring][0].westWall = rectCell.eastWall;
+          circCell.westWall = rectCell.westWall;
         }
   
         // For innermost ring (ring 0), always have north wall
         if (ring === 0) {
           circCell.northWall = true;
         }
+      }
+    }
+  
+    // Handle wraparound connections separately
+    for (let ring = 0; ring < rings; ring++) {
+      const lastSector = sectors - 1;
+      const rectLastCell = rectangularMaze[ring][lastSector];
+      const circLastCell = circularMaze[ring][lastSector];
+      const circFirstCell = circularMaze[ring][0];
+  
+      // Check if there should be a passage between first and last sectors
+      const shouldConnect = true // !rectLastCell.eastWall;
+      
+      if (Math.random() > 0.5) {
+        // Remove walls between first and last sectors
+        circLastCell.eastWall = false;
+        circFirstCell.westWall = false;
       }
     }
   
@@ -466,9 +484,10 @@ export const useMazeGeneration = (
     // Set exit
     circularMaze[rings - 1][exitSector].isExit = true;
     circularMaze[rings - 1][exitSector].southWall = false;
-
+  
     return circularMaze;
   };
+
   
   const addEntranceAndExit = (maze: Cell[][], rows: number, columns: number, settings: MazeSettings): Cell[][] => {
     const newMaze = JSON.parse(JSON.stringify(maze));
