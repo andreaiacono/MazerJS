@@ -23,10 +23,6 @@ export const GenerationSection: React.FC<GenerationSectionProps> = ({
 
   const handleAlgorithmChange = (newAlgorithm: MazeAlgorithm) => {
     setAlgorithm(newAlgorithm);
-    algorithmConfigs[newAlgorithm]?.forEach((config) => {
-      onMazeSettingChange(config.key, config.start);
-    });
-    generateMaze();
   };
 
   const algorithmConfigs: Record<MazeAlgorithm, Array<{

@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { MazeContext } from './MazeContext';
 import {
   Cell,
@@ -57,6 +57,11 @@ export const MazeProvider: React.FC<{ children: React.ReactNode }> = ({ children
     solverSettings.speed,
     frameType as 'square' | 'circular' | 'polygon' | 'text'
   );
+
+  useEffect(() => {
+    // Generate maze whenever algorithm changes
+    generateMaze();
+  }, [algorithm]); // Only dependency should be algorithm
 
   // Add path update handler
   const handlePathUpdate = useCallback((path: Position[]) => {
