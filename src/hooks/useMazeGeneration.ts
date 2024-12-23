@@ -12,6 +12,21 @@ import { isPointInPolygon, getPolygonPoints, distanceToLineSegment } from '../ut
 import { manhattanDistance } from '../utils/helpers/pathfinding';
 import { getLetterPixels } from './../utils/helpers/drawing'
 
+export interface ConcPentagonCell {
+  // Walls along the pentagon edge
+  edgeWall: boolean;
+  // Wall to next ring
+  ringWall: boolean;
+  visited: boolean;
+  isEntrance: boolean;
+  isExit: boolean;
+  isSolution: boolean;
+  // Position information
+  ring: number;      // Which concentric ring (0 = outermost)
+  edge: number;      // Which edge of the pentagon (0-4)
+  segment: number;   // Position along the edge
+}
+
 export const useMazeGeneration = (
   frameType: FrameType,
   algorithm: MazeAlgorithm,
@@ -192,13 +207,13 @@ export const useMazeGeneration = (
 
   const generateTextMaze = useCallback(() => {
     if (!text) return null;
-  
+
     // Calculate dimensions based on text length
     const textDimensions = {
       width: 50 * Math.max(text.length, 1),
       height: rows
     };
-  
+
     // Initialize empty maze array
     const newMaze: Cell[][] = Array(rows)
       .fill(null)
@@ -217,16 +232,16 @@ export const useMazeGeneration = (
           radialWall: false
         }))
       );
-  
+
     // Get pixels for the text
     const pixels = getLetterPixels(text, textDimensions);
-  
+
     // Process each cell
     for (let row = 0; row < rows; row++) {
       for (let col = 0; col < textDimensions.width; col++) {
         const isTextCell = pixels.has(`${col},${row}`);
         newMaze[row][col].visited = !isTextCell;
-  
+
         if (isTextCell) {
           if (pixels.has(`${col},${row - 1}`)) newMaze[row][col].northWall = false;
           if (pixels.has(`${col},${row + 1}`)) newMaze[row][col].southWall = false;
@@ -235,18 +250,18 @@ export const useMazeGeneration = (
         }
       }
     }
-  
+
     let entranceY = Math.floor(rows / 2);
     let exitY = Math.floor(rows / 2);
     let entranceFound = false;
     let exitFound = false;
-  
+
     for (let offset = 0; offset < Math.floor(rows / 2); offset++) {
       const checkPositions = [
         Math.floor(rows / 2) + offset,
         Math.floor(rows / 2) - offset
       ];
-  
+
       for (const y of checkPositions) {
         if (y >= 0 && y < rows) {
           if (!entranceFound && pixels.has(`0,${y}`)) {
@@ -259,10 +274,10 @@ export const useMazeGeneration = (
           }
         }
       }
-  
+
       if (entranceFound && exitFound) break;
     }
-  
+
     if (entranceFound) {
       newMaze[entranceY][0].isEntrance = true;
       newMaze[entranceY][0].westWall = false;
@@ -271,10 +286,10 @@ export const useMazeGeneration = (
       newMaze[exitY][textDimensions.width - 1].isExit = true;
       newMaze[exitY][textDimensions.width - 1].eastWall = false;
     }
-  
+
     return newMaze;
   }, [text, rows]);
-  
+
   const adjustCellsToPolygon = (
     maze: Cell[][],
     rows: number,
@@ -283,9 +298,41 @@ export const useMazeGeneration = (
     cellSize: number,
     settings: MazeSettings
   ): Cell[][] => {
-    // Initialize new maze
-    const newMaze = Array(rows).fill(null).map(() =>
-      Array(columns).fill(null).map(() => ({
+    // Calculate dimensions for our maze
+    const rings = Math.max(2, Math.floor(rows / 2));
+    const sectorsPerSide = Math.max(2, Math.floor(columns / sides));
+    const totalSectors = sectorsPerSide * sides;
+  
+    // Generate the base rectangular maze first
+    let rectangularMaze: Cell[][] = [];
+    
+    // Use chosen algorithm to generate the initial maze pattern
+    switch (algorithm) {
+      case 'binary':
+        rectangularMaze = binaryMaze(rings, totalSectors, settings.horizontalBias);
+        break;
+      case 'sidewinder':
+        rectangularMaze = sidewinderMaze(rings, totalSectors, settings.horizontalBias, settings.branchingProbability);
+        break;
+      case 'recursive-backtracker':
+        rectangularMaze = recursiveBacktracker(rings, totalSectors, settings.branchingProbability, settings.deadEndDensity);
+        break;
+      case 'prims':
+        rectangularMaze = primsAlgorithm(rings, totalSectors, settings.branchingProbability);
+        break;
+      case 'recursive-division':
+        rectangularMaze = recursiveDivision(rings, totalSectors, settings.horizontalBias);
+        break;
+      case 'hunt-and-kill':
+        rectangularMaze = huntAndKill(rings, totalSectors, settings.branchingProbability, settings.deadEndDensity);
+        break;
+      default:
+        rectangularMaze = binaryMaze(rings, totalSectors, 0.5);
+    }
+  
+    // Create our polygon maze structure
+    const polygonMaze: Cell[][] = Array(rings).fill(null).map(() =>
+      Array(totalSectors).fill(null).map(() => ({
         northWall: true,
         southWall: true,
         eastWall: true,
@@ -297,91 +344,65 @@ export const useMazeGeneration = (
       }))
     );
   
-    // Calculate polygon parameters
-    const mazeWidth = columns * cellSize;
-    const mazeHeight = rows * cellSize;
-    const centerX = mazeWidth / 2;
-    const centerY = mazeHeight / 2;
-    const radius = Math.min(mazeWidth, mazeHeight) / 2 * 0.8;
-    const points = getPolygonPoints(sides, radius, centerX, centerY);
+    // Map the rectangular maze to our polygon structure
+    for (let ring = 0; ring < rings; ring++) {
+      for (let sector = 0; sector < totalSectors; sector++) {
+        if (!rectangularMaze[ring] || !rectangularMaze[ring][sector]) continue;
   
-    // First, identify valid cells (inside polygon)
-    const validCells: boolean[][] = Array(rows).fill(null)
-      .map(() => Array(columns).fill(false));
+        const rectCell = rectangularMaze[ring][sector];
+        const polyCell = polygonMaze[ring][sector];
+        
+        // Calculate position within the polygon structure
+        const currentSide = Math.floor(sector / sectorsPerSide);
+        const positionInSide = sector % sectorsPerSide;
   
-    for (let row = 0; row < rows; row++) {
-      for (let col = 0; col < columns; col++) {
-        const cellCenterX = (col + 0.5) * cellSize;
-        const cellCenterY = (row + 0.5) * cellSize;
-        validCells[row][col] = isPointInPolygon(cellCenterX, cellCenterY, points);
-      }
-    }
-  
-    // Copy valid cells from original maze
-    for (let row = 0; row < rows; row++) {
-      for (let col = 0; col < columns; col++) {
-        if (validCells[row][col] && maze[row]?.[col]) {
-          newMaze[row][col] = { ...maze[row][col] };
+        // Copy most walls directly
+        polyCell.northWall = rectCell.northWall;
+        polyCell.southWall = rectCell.southWall;
+        
+        // Handle east/west walls with special vertex consideration
+        if (positionInSide === sectorsPerSide - 1) {
+          // We're at a vertex - use probability to decide if walls should exist
+          const isVertexWall = Math.random() < settings.branchingProbability * 0.7;
+          polyCell.eastWall = isVertexWall;
+          
+          // If we create a passage at a vertex, ensure proper connection
+          if (!isVertexWall && sector < totalSectors - 1) {
+            polyCell.eastWall = false;
+            polygonMaze[ring][(sector + 1) % totalSectors].westWall = false;
+          }
         } else {
-          // Mark cells outside polygon as invalid
-          newMaze[row][col].visited = true;
+          // Normal cell within a side
+          polyCell.eastWall = rectCell.eastWall;
+          polyCell.westWall = rectCell.westWall;
+        }
+  
+        // Special handling for innermost ring
+        if (ring === 0) {
+          // Allow some gaps in the center pentagon walls
+          polyCell.northWall = Math.random() < 0.7; // 70% chance of wall
         }
       }
     }
   
-    // Find entrance and exit positions
-    const entranceCell = findEntrancePosition(validCells, points, settings.entrancePosition);
-    let exitCell = findExitPosition(validCells, points, settings.exitPosition, entranceCell);
+    // Add entrance and exit on different sides
+    const entranceSide = Math.floor(Math.random() * sides);
+    let exitSide;
+    do {
+      exitSide = Math.floor(Math.random() * sides);
+    } while (exitSide === entranceSide);
   
-    // Set entrance and exit
-    if (entranceCell) {
-      const [entranceRow, entranceCol] = entranceCell;
-      newMaze[entranceRow][entranceCol].isEntrance = true;
-      // Remove appropriate wall based on nearest edge
-      const nearestSide = findNearestPolygonSide(
-        (entranceCol + 0.5) * cellSize,
-        (entranceRow + 0.5) * cellSize,
-        points
-      );
-      removeWallForSide(newMaze[entranceRow][entranceCol], nearestSide);
-    }
+    const entranceCell = (entranceSide * sectorsPerSide) + Math.floor(sectorsPerSide / 2);
+    const exitCell = (exitSide * sectorsPerSide) + Math.floor(sectorsPerSide / 2);
   
-    if (exitCell) {
-      const [exitRow, exitCol] = exitCell;
-      newMaze[exitRow][exitCol].isExit = true;
-      // Remove appropriate wall based on nearest edge
-      const nearestSide = findNearestPolygonSide(
-        (exitCol + 0.5) * cellSize,
-        (exitRow + 0.5) * cellSize,
-        points
-      );
-      removeWallForSide(newMaze[exitRow][exitCol], nearestSide);
-    }
+    polygonMaze[rings - 1][entranceCell].isEntrance = true;
+    polygonMaze[rings - 1][entranceCell].southWall = false;
+    polygonMaze[0][exitCell].isExit = true;
+    polygonMaze[0][exitCell].northWall = false;
   
-    // Verify path exists between entrance and exit
-    if (entranceCell && exitCell) {
-      const pathExists = verifyPath(
-        newMaze,
-        { row: entranceCell[0], col: entranceCell[1] },
-        { row: exitCell[0], col: exitCell[1] },
-        validCells
-      );
-  
-      if (!pathExists) {
-        // If no path exists, create one
-        createPath(
-          newMaze,
-          { row: entranceCell[0], col: entranceCell[1] },
-          { row: exitCell[0], col: exitCell[1] },
-          validCells
-        );
-      }
-    }
-  
-    return newMaze;
+    return polygonMaze;
   };
   
-
   const adjustCellsToCircular = (
     maze: Cell[][],
     rows: number,
@@ -392,10 +413,10 @@ export const useMazeGeneration = (
     // Calculate dimensions but skip innermost ring
     const rings = Math.max(2, Math.floor(rows / 2)) - 1;  // Subtract 1 to remove inner ring
     const sectors = Math.max(4, columns);
-  
+
     // First, generate a rectangular maze using the existing algorithm but with one less ring
     let rectangularMaze: Cell[][] = [];
-  
+
     switch (algorithm) {
       case 'binary':
         rectangularMaze = binaryMaze(rings, sectors, settings.horizontalBias);
@@ -418,7 +439,7 @@ export const useMazeGeneration = (
       default:
         rectangularMaze = binaryMaze(rings, sectors, 0.5);
     }
-  
+
     // Create circular maze with same dimensions
     const circularMaze: Cell[][] = Array(rings).fill(null).map(() =>
       Array(sectors).fill(null).map(() => ({
@@ -432,86 +453,85 @@ export const useMazeGeneration = (
         isSolution: false
       }))
     );
-  
+
     // Map the rectangular maze to circular
     for (let ring = 0; ring < rings; ring++) {
       for (let sector = 0; sector < sectors; sector++) {
         const rectCell = rectangularMaze[ring][sector];
         const circCell = circularMaze[ring][sector];
-  
+
         // Map the walls
         circCell.northWall = rectCell.northWall;
         circCell.southWall = rectCell.southWall;
-        
+
         // Handle east/west walls normally for non-wraparound case
         if (sector < sectors - 1) {
           circCell.eastWall = rectCell.eastWall;
           circCell.westWall = rectCell.westWall;
         }
-  
+
         // For innermost ring (ring 0), always have north wall
         if (ring === 0) {
           circCell.northWall = true;
         }
       }
     }
-  
+
     // Handle wraparound connections separately
     for (let ring = 0; ring < rings; ring++) {
       const lastSector = sectors - 1;
       const rectLastCell = rectangularMaze[ring][lastSector];
       const circLastCell = circularMaze[ring][lastSector];
       const circFirstCell = circularMaze[ring][0];
-  
+
       // Check if there should be a passage between first and last sectors
       const shouldConnect = true // !rectLastCell.eastWall;
-      
+
       if (Math.random() > 0.5) {
         // Remove walls between first and last sectors
         circLastCell.eastWall = false;
         circFirstCell.westWall = false;
       }
     }
-  
+
     // Add entrance and exit
     const entranceSector = Math.floor(sectors * 0.25);  // Place at 90 degrees
     const exitSector = Math.floor(sectors * 0.75);      // Place at 270 degrees
-  
+
     // Set entrance
     circularMaze[rings - 1][entranceSector].isEntrance = true;
     circularMaze[rings - 1][entranceSector].southWall = false;
-  
+
     // Set exit
     circularMaze[rings - 1][exitSector].isExit = true;
     circularMaze[rings - 1][exitSector].southWall = false;
-  
+
     return circularMaze;
   };
 
-  
   const addEntranceAndExit = (maze: Cell[][], rows: number, columns: number, settings: MazeSettings): Cell[][] => {
     const newMaze = JSON.parse(JSON.stringify(maze));
-  
+
     // Special handling for circular maze
-    if (frameType === 'circular') {
+    if (frameType === 'circular' || frameType == 'polygon') {
       const rings = Math.floor(rows / 2);
       const sectors = columns;
-  
+
       // For circular maze, add entrance at outer ring and exit at inner ring
       if (maze[0] && maze[0][0]) {  // Outer ring, first sector
         newMaze[0][0].isEntrance = true;
         newMaze[0][0].northWall = false;  // Remove outer wall for entrance
       }
-  
+
       const exitSector = Math.floor(sectors / 2);
       if (maze[rings - 1] && maze[rings - 1][exitSector]) {  // Inner ring, opposite side
         newMaze[rings - 1][exitSector].isExit = true;
         newMaze[rings - 1][exitSector].southWall = false;  // Remove inner wall for exit
       }
-  
+
       return newMaze;
     }
-  
+
     // Original rectangular maze handling
     const getPosition = (position: 'north' | 'south' | 'east' | 'west' | 'random'): [number, number] => {
       switch (position) {
@@ -530,7 +550,7 @@ export const useMazeGeneration = (
           return [0, 0];
       }
     };
-  
+
     // Add entrance
     const [entranceRow, entranceCol] = getPosition(settings.entrancePosition);
     if (entranceRow === 0) {
@@ -543,14 +563,14 @@ export const useMazeGeneration = (
       newMaze[entranceRow][entranceCol].eastWall = false;
     }
     newMaze[entranceRow][entranceCol].isEntrance = true;
-  
+
     // Add exit
     let exitRow: number, exitCol: number;
     if (settings.exitPosition === 'farthest') {
       // Find the cell farthest from entrance using simple distance
       let maxDistance = 0;
       let farthestCell: [number, number] = [0, 0];
-  
+
       for (let row = 0; row < rows; row++) {
         for (let col = 0; col < columns; col++) {
           const distance = Math.abs(row - entranceRow) + Math.abs(col - entranceCol);
@@ -564,7 +584,7 @@ export const useMazeGeneration = (
     } else {
       [exitRow, exitCol] = getPosition(settings.exitPosition);
     }
-  
+
     if (exitRow === 0) {
       newMaze[exitRow][exitCol].northWall = false;
     } else if (exitRow === rows - 1) {
@@ -575,10 +595,10 @@ export const useMazeGeneration = (
       newMaze[exitRow][exitCol].eastWall = false;
     }
     newMaze[exitRow][exitCol].isExit = true;
-  
+
     return newMaze;
   };
-  
+
   const verifyPath = (
     maze: Cell[][],
     start: Position,
