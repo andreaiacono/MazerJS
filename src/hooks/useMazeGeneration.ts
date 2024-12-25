@@ -333,10 +333,10 @@ export const useMazeGeneration = (
     // Create our polygon maze structure
     const polygonMaze: Cell[][] = Array(rings).fill(null).map(() =>
       Array(totalSectors).fill(null).map(() => ({
-        northWall: true,
-        southWall: true,
-        eastWall: true,
-        westWall: true,
+        northWall: false,
+        southWall: false,
+        eastWall: false,
+        westWall: false,
         visited: false,
         isEntrance: false,
         isExit: false,
@@ -364,8 +364,6 @@ export const useMazeGeneration = (
         if (positionInSide === sectorsPerSide - 1) {
           // We're at a vertex - use probability to decide if walls should exist
           const isVertexWall = Math.random() < settings.branchingProbability * 0.7;
-          polyCell.eastWall = isVertexWall;
-          
           // If we create a passage at a vertex, ensure proper connection
           if (!isVertexWall && sector < totalSectors - 1) {
             polyCell.eastWall = false;

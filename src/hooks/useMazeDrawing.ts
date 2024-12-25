@@ -97,9 +97,9 @@ export const useMazeDrawing = () => {
       const ringWidth = maxRadius / (rings + 1);
       const totalCells = maze[0]?.length || 0;
       
-      // Helper to get a point on a pentagon at a given radius and progress (0 to 1)
+      // Helper to get a point on a polygon at a given radius and progress (0 to 1)
       const getPointOnRing = (radius: number, progress: number): [number, number] => {
-        // Determine which side of the pentagon we're on
+        // Determine which side of the polygon we're on
         const sideProgress = progress * sides; // Convert overall progress to progress within sides
         const currentSide = Math.floor(sideProgress);
         const progressInSide = sideProgress - currentSide;
@@ -121,7 +121,7 @@ export const useMazeDrawing = () => {
         ];
       };
     
-      // Draw inner pentagon
+      // Draw inner polygon
       const innerRadius = ringWidth;
       ctx.beginPath();
       for (let i = 0; i <= sides; i++) {
