@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { Cell, FrameType, Position } from '../utils/types';
-import { drawLine, drawArrow, getArrowPadding } from '../utils/helpers/drawing';
+import { drawArrow, drawLine, getArrowPadding, getLetterPixels } from '../utils/helpers/drawing';
 import { isPointInPolygon, getPolygonPoints, distanceToLineSegment } from '../utils/helpers/geometryHelpers';
 // import { getLetterPixels } from './../utils/helpers/drawing'
 
@@ -344,40 +344,6 @@ export const useMazeDrawing = () => {
       }
     };
 
-    const drawArrow = (
-      ctx: CanvasRenderingContext2D,
-      fromX: number,
-      fromY: number,
-      toX: number,
-      toY: number,
-      color: string
-    ) => {
-      const headLength = 10;
-      const angle = Math.atan2(toY - fromY, toX - fromX);
-
-      ctx.strokeStyle = color;
-
-      // Draw arrow shaft
-      ctx.beginPath();
-      ctx.moveTo(fromX, fromY);
-      ctx.lineTo(toX, toY);
-      ctx.stroke();
-
-      // Draw arrow head
-      ctx.beginPath();
-      ctx.moveTo(toX, toY);
-      ctx.lineTo(
-        toX - headLength * Math.cos(angle - Math.PI / 6),
-        toY - headLength * Math.sin(angle - Math.PI / 6)
-      );
-      ctx.moveTo(toX, toY);
-      ctx.lineTo(
-        toX - headLength * Math.cos(angle + Math.PI / 6),
-        toY - headLength * Math.sin(angle + Math.PI / 6)
-      );
-      ctx.stroke();
-    };
-
     const drawTextMaze = (
       ctx: CanvasRenderingContext2D,
       maze: Cell[][],
@@ -447,42 +413,42 @@ export const useMazeDrawing = () => {
       }
     };
 
-    const getLetterPixels = (text: string, dimensions: { width: number; height: number }) => {
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return new Set<string>();
+    // const getLetterPixels = (text: string, dimensions: { width: number; height: number }) => {
+    //   const canvas = document.createElement('canvas');
+    //   const ctx = canvas.getContext('2d');
+    //   if (!ctx) return new Set<string>();
 
-      canvas.width = dimensions.width;
-      canvas.height = dimensions.height;
-      ctx.fillStyle = 'white';
-      ctx.fillRect(0, 0, dimensions.width, dimensions.height);
+    //   canvas.width = dimensions.width;
+    //   canvas.height = dimensions.height;
+    //   ctx.fillStyle = 'white';
+    //   ctx.fillRect(0, 0, dimensions.width, dimensions.height);
 
-      const fontSize = dimensions.height * 0.8;
-      ctx.font = `900 ${fontSize}px "Times New Roman"`;
+    //   const fontSize = dimensions.height * 0.8;
+    //   ctx.font = `900 ${fontSize}px "Times New Roman"`;
 
-      const letterWidths = text.split('').map(l => ctx.measureText(l).width);
-      // const totalWidth = letterWidths.reduce((a, b) => a + b, 0);
-      const spacing = -fontSize * 0.08;
-      const baseX = fontSize;
+    //   const letterWidths = text.split('').map(l => ctx.measureText(l).width);
+    //   // const totalWidth = letterWidths.reduce((a, b) => a + b, 0);
+    //   const spacing = -fontSize * 0.08;
+    //   const baseX = fontSize;
 
-      text.split('').forEach((letter, i) => {
-        const x = baseX + letterWidths.slice(0, i).reduce((a, b) => a + b, 0) + spacing * i;
-        ctx.fillStyle = 'black';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(letter, x, dimensions.height / 2);
-      });
+    //   text.split('').forEach((letter, i) => {
+    //     const x = baseX + letterWidths.slice(0, i).reduce((a, b) => a + b, 0) + spacing * i;
+    //     ctx.fillStyle = 'black';
+    //     ctx.textBaseline = 'middle';
+    //     ctx.fillText(letter, x, dimensions.height / 2);
+    //   });
 
-      const pixels = new Set<string>();
-      const imageData = ctx.getImageData(0, 0, dimensions.width, dimensions.height);
-      for (let y = 0; y < dimensions.height; y++) {
-        for (let x = 0; x < dimensions.width; x++) {
-          if (imageData.data[(y * dimensions.width + x) * 4] < 128) {
-            pixels.add(`${x},${y}`);
-          }
-        }
-      }
-      return pixels;
-    };
+    //   const pixels = new Set<string>();
+    //   const imageData = ctx.getImageData(0, 0, dimensions.width, dimensions.height);
+    //   for (let y = 0; y < dimensions.height; y++) {
+    //     for (let x = 0; x < dimensions.width; x++) {
+    //       if (imageData.data[(y * dimensions.width + x) * 4] < 128) {
+    //         pixels.add(`${x},${y}`);
+    //       }
+    //     }
+    //   }
+    //   return pixels;
+    // };
 
     const { rows, columns, sides, cellSize, wallColor, backgroundColor,
       wallThickness, showArrows, solutionColor, solutionPath, text } = options;

@@ -21,42 +21,41 @@ export const drawArrow = (
   fromY: number,
   toX: number,
   toY: number,
-  arrowColor: string,
-  
+  color: string,
 ) => {
-  ctx.strokeStyle = arrowColor;
-  const initialWidth = ctx.lineWidth
-  ctx.lineWidth = 3
+  const originalWidth = ctx.lineWidth
+  const size = Math.abs(toX - fromX)
+  fromX += size / 8
+  toX -= size / 8
+
+  const headLength = size / 2;
   const angle = Math.atan2(toY - fromY, toX - fromX);
-  const headlen = (toX - fromX) / 3
-  // Draw the line
+
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 2
+
+  // Draw arrow shaft
   ctx.beginPath();
   ctx.moveTo(fromX, fromY);
-  ctx.lineTo(toX -headlen, toY);
+  ctx.lineTo(toX, toY);
   ctx.stroke();
 
-  // Calculate arrowhead points
-  const arrowX = toX - headlen * Math.cos(angle);
-  const arrowY = toY - headlen * Math.sin(angle);
-
-  // Draw the arrowhead
+  // Draw arrow head
   ctx.beginPath();
-  ctx.fillStyle = arrowColor;
   ctx.moveTo(toX, toY);
   ctx.lineTo(
-    arrowX - headlen * Math.cos(angle - Math.PI / 6),
-    arrowY - headlen * Math.sin(angle - Math.PI / 6)
+    toX - headLength * Math.cos(angle - Math.PI / 6),
+    toY - headLength * Math.sin(angle - Math.PI / 6)
   );
+  ctx.moveTo(toX, toY);
   ctx.lineTo(
-    arrowX - headlen * Math.cos(angle + Math.PI / 6),
-    arrowY - headlen * Math.sin(angle + Math.PI / 6)
+    toX - headLength * Math.cos(angle + Math.PI / 6),
+    toY - headLength * Math.sin(angle + Math.PI / 6)
   );
-  ctx.lineTo(toX, toY); // Connect back to the tip
-  ctx.closePath();
-  ctx.fill();
-  ctx.lineWidth = initialWidth
-};
+  ctx.stroke();
 
+  ctx.lineWidth = originalWidth
+};
 
 export const getLetterPixels = (text: string, dimensions: { width: number; height: number }) => {
   const canvas = document.createElement('canvas');
