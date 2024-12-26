@@ -1,12 +1,12 @@
 import { Cell, Position, MazeSettings } from '../types';
 
-export const createEmptyGrid = (rows: number, columns: number): Cell[][] => {
+export const createEmptyGrid = (rows: number, columns: number, createWalls: boolean = true): Cell[][] => {
   return Array(rows).fill(null).map(() => 
     Array(columns).fill(null).map(() => ({
-      northWall: true,
-      southWall: true,
-      eastWall: true,
-      westWall: true,
+      northWall: createWalls,
+      southWall: createWalls,
+      eastWall: createWalls,
+      westWall: createWalls,
       visited: false,
       isEntrance: false, 
       isExit: false,
