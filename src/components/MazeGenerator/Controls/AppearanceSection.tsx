@@ -35,27 +35,29 @@ export const AppearanceSection: React.FC<AppearanceSectionProps> = ({
     square: [
       { key: 'rows', label: "Rows", value: settings.rows, min: 2, max: 200, start: 10 },
       { key: 'columns', label: "Columns", value: settings.columns, min: 4, max: 200, start: 10 },
-      { key: 'cellSize', label: "Maze Size", value: settings.cellSize, min: 2, max: 80, start: 20 },
       { key: 'wallThickness', label: "Wall thickness", value: settings.wallThickness, min: 1, max: 10, start: 2 },
+      { key: 'cellSize', label: "Zoom", value: settings.cellSize, min: 2, max: 80, start: 20 },
     ],
     circular: [
       { key: 'rows', label: "Rings", value: settings.rows, min: 4, max: 100, start: 10 },
       { key: 'columns', label: "Sectors", value: settings.columns, min: 4, max: 100, start: 10 },
-      { key: 'cellSize', label: "Maze Size", value: settings.cellSize, min: 2, max: 80, start: 10 },
       { key: 'wallThickness', label: "Wall thickness", value: settings.wallThickness, min: 1, max: 10, start: 2 },
+      { key: 'cellSize', label: "Zoom", value: settings.cellSize, min: 2, max: 80, start: 20 },
+      
     ],
     polygon: [
       { key: 'polygonSides', label: "Number of Sides", value: settings.polygonSides, min: 3, max: 20, step: 1, start: 5 },
-      { key: 'rows', label: "Rows", value: settings.rows, min: 4, max: 100, start: 10 },
-      { key: 'columns', label: "Columns", value: settings.columns, min: 4, max: 200, start: 10 },
-      { key: 'cellSize', label: "Maze Size", value: settings.cellSize, min: 2, max: 80, start: 20 },
+      { key: 'rows', label: "Rings", value: settings.rows, min: 4, max: 100, start: 10 },
+      { key: 'columns', label: "Sectors", value: settings.columns, min: 4, max: 200, start: 10 },
       { key: 'wallThickness', label: "Wall thickness", value: settings.wallThickness, min: 1, max: 10, start: 2 },
+      { key: 'cellSize', label: "Zoom", value: settings.cellSize, min: 2, max: 80, start: 20 },
+      
     ],
     text: [
       { key: 'letterSize', label: "Letter Size", value: settings.letterSize, min: 5, max: 20, start: 10 },
       { key: 'letterDistance', label: "Letter Distance", value: settings.letterDistance, min: 1, max: 20, start: 10 },
-      { key: 'cellSize', label: "Maze Size", value: settings.cellSize, min: 2, max: 80, start: 20 },
       { key: 'wallThickness', label: "Wall thickness", value: settings.wallThickness, min: 1, max: 10, start: 2 },
+      { key: 'cellSize', label: "Zoom", value: settings.cellSize, min: 2, max: 80, start: 20 },
     ]
   };
 

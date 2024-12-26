@@ -40,7 +40,7 @@ export const Canvas: React.FC<CanvasProps> = ({
   const getCanvasDimensions = () => {
     const arrowPadding = getArrowPadding(cellSize);
 
-    if (frameType === 'circular') {
+    if (frameType === 'circular' || frameType ==='polygon') {
       return {
         width: 20 * cellSize + (2 * arrowPadding),
         height: 20 * cellSize + (2 * arrowPadding)
@@ -99,7 +99,7 @@ export const Canvas: React.FC<CanvasProps> = ({
       style={{
         backgroundColor,
         margin: -arrowPadding,
-        border: '2px solid #ccc'
+        // border: '2px solid #ccc'
       }}
     />
   );
