@@ -137,12 +137,10 @@ export const useMazeGeneration = (
 
     try {
       const validCells = generateValidCells(frameType);
-      const algorithmFn = algorithmMap[algorithm] || algorithmMap.binary;
-      
+
       // Calculate dimensions based on frame type
       let effectiveRows = rows;
       let effectiveColumns = columns;
-      
       if (frameType === 'circular') {
         effectiveRows = Math.max(2, Math.floor(rows / 2)) - 1;  // Subtract 1 to remove inner ring
         effectiveColumns = Math.max(4, columns);
@@ -150,15 +148,50 @@ export const useMazeGeneration = (
         effectiveRows = Math.max(2, Math.floor(rows / 2));
         effectiveColumns = Math.max(2, Math.floor(columns / polygonSides)) * polygonSides;
       }
-      
-      // Generate base maze with correct dimensions
-      let maze = algorithmFn(
-        effectiveRows, 
-        effectiveColumns, 
-        mazeSettings.horizontalBias, 
-        mazeSettings.branchingProbability, 
-        mazeSettings.deadEndDensity
-      );
+
+      // Call the algorithm with the appropriate parameters based on its type
+      let maze;
+      if (algorithm === 'sidewinder') {
+        maze = sidewinderMaze(
+          effectiveRows,
+          effectiveColumns,
+          mazeSettings.horizontalBias,
+          mazeSettings.branchingProbability,
+        );
+      } else if (algorithm === 'recursive-backtracker') {
+        maze = recursiveBacktracker(
+          effectiveRows,
+          effectiveColumns,
+          mazeSettings.branchingProbability,
+          mazeSettings.deadEndDensity
+        );
+      } else if (algorithm === 'prims') {
+        maze = primsAlgorithm(
+          effectiveRows,
+          effectiveColumns,
+          mazeSettings.branchingProbability
+        );
+      } else if (algorithm === 'recursive-division') {
+        maze = recursiveDivision(
+          effectiveRows,
+          effectiveColumns,
+          mazeSettings.horizontalBias,
+        );
+      } else if (algorithm === 'hunt-and-kill') {
+        maze = huntAndKill(
+          effectiveRows,
+          effectiveColumns,
+          mazeSettings.branchingProbability,
+          mazeSettings.deadEndDensity,
+        );
+      }
+      else {
+        maze = binaryMaze(
+          effectiveRows,
+          effectiveColumns,
+          mazeSettings.horizontalBias
+        );
+      }
 
       // Apply frame-specific adjustments
       if (frameType === 'circular') {
@@ -167,8 +200,8 @@ export const useMazeGeneration = (
         maze = adjustMazeToPolygon(maze, rows, columns, polygonSides, cellSize, mazeSettings);
       } else if (validCells) {
         // For rectangular mazes, apply the valid cells mask if needed
-        maze = maze.map((row, i) => 
-          row.map((cell, j) => 
+        maze = maze.map((row, i) =>
+          row.map((cell, j) =>
             validCells[i][j] ? cell : createEmptyCell(false)
           )
         );
@@ -193,6 +226,7 @@ export const useMazeGeneration = (
   return { generateMaze };
 };
 
+
 const adjustMazeToCircular = (
   rectangularMaze: Cell[][],
   rows: number,
@@ -202,7 +236,7 @@ const adjustMazeToCircular = (
 ): Cell[][] => {
   const rings = Math.max(2, Math.floor(rows / 2)) - 1;
   const sectors = Math.max(4, columns);
-  
+
   // Create circular maze structure
   const circularMaze: Cell[][] = Array(rings).fill(null).map(() =>
     Array(sectors).fill(null).map(() => ({
