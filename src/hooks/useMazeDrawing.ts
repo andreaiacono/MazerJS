@@ -170,7 +170,8 @@ export const useMazeDrawing = () => {
           const innerStart = getPointOnRing(currentRadius - ringWidth, cellProgress);
           const innerEnd = getPointOnRing(currentRadius - ringWidth, nextCellProgress);
     
-          if (perpendicularWalls) {
+          // if (perpendicularWalls) {          
+          if (false) {
             // Calculate tangent vector along the ring wall
             const dirX = outerEnd[0] - outerStart[0];
             const dirY = outerEnd[1] - outerStart[1];

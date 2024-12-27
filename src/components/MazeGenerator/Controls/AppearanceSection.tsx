@@ -131,7 +131,7 @@ export const AppearanceSection: React.FC<AppearanceSectionProps> = ({
             <div className="flex items-center space-x-2">
             <Checkbox
               disabled={true}
-              checked={settings.perpendicularWalls}
+              checked={false}
               label="Perpendicular Walls"
               onChange={(checked: boolean) => onSettingChange('perpendicularWalls', checked)}
             />
