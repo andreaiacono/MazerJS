@@ -80,6 +80,13 @@ export const useMazeGeneration = (
       height: rows
     };
 
+    const directions = {
+      north: [0, -1],
+      south: [0, 1],
+      east: [1, 0],
+      west: [-1, 0]
+    }
+    type Direction = 'north' | 'south' | 'east' | 'west';
     const maze = createMazeGrid(rows, textDimensions.width);
     const pixels = getLetterPixels(text, textDimensions);
 
@@ -90,14 +97,8 @@ export const useMazeGeneration = (
         maze[row][col].visited = !isTextCell;
 
         if (isTextCell) {
-          ['north', 'south', 'east', 'west'].forEach(direction => {
-            const [dx, dy] = {
-              north: [0, -1],
-              south: [0, 1],
-              east: [1, 0],
-              west: [-1, 0]
-            }[direction];
-            
+          (['north', 'south', 'east', 'west'] as const).forEach((direction: Direction) => {
+            const [dx, dy] = directions[direction];
             if (pixels.has(`${col + dx},${row + dy}`)) {
               maze[row][col][`${direction}Wall`] = false;
             }
