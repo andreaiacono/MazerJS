@@ -17,6 +17,7 @@ interface CanvasProps {
   sides: number;
   solutionPath?: Position[];
   text: string;
+  perpendicularWalls: boolean;
 }
 
 export const Canvas: React.FC<CanvasProps> = ({
@@ -32,7 +33,8 @@ export const Canvas: React.FC<CanvasProps> = ({
   showArrows,
   sides,
   solutionPath,
-  text
+  text,
+  perpendicularWalls
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { drawMaze } = useMazeDrawing();
@@ -83,10 +85,11 @@ export const Canvas: React.FC<CanvasProps> = ({
       showArrows,
       solutionColor,
       solutionPath,
-      text
+      text,
+      perpendicularWalls
     });
   }, [maze, frameType, rows, columns, cellSize, wallColor, backgroundColor, 
-      wallThickness, showArrows, sides, solutionColor, drawMaze, solutionPath, text]);
+      wallThickness, showArrows, sides, solutionColor, drawMaze, solutionPath, text, perpendicularWalls]);
 
   const { width, height } = getCanvasDimensions();
   const arrowPadding = getArrowPadding(cellSize);

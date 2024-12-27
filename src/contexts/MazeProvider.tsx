@@ -41,7 +41,8 @@ export const MazeProvider: React.FC<{ children: React.ReactNode }> = ({ children
     backgroundColor: "#ffffff",
     text: "MAZE",
     letterDistance: 5,
-    letterSize: 5
+    letterSize: 5,
+    perpendicularWalls: true
   });
 
   const [solverSettings, setSolverSettings] = useState<SolverSettings>({

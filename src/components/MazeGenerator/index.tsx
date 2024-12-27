@@ -61,7 +61,8 @@ const MazeGenerator: React.FC = () => {
     appearanceSettings.wallColor,
     appearanceSettings.backgroundColor,
     appearanceSettings.wallThickness,
-    appearanceSettings.cellSize
+    appearanceSettings.cellSize,
+    appearanceSettings.perpendicularWalls
   ]);
 
   const handleSolverSettingChange = (setting: keyof SolverSettings, value: any) => {
@@ -110,6 +111,7 @@ const MazeGenerator: React.FC = () => {
             sides={appearanceSettings.polygonSides}
             solutionPath={solutionPath}
             text={appearanceSettings.text}
+            perpendicularWalls={appearanceSettings.perpendicularWalls}
           />
         </div>
       </div>

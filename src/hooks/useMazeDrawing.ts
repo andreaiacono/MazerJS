@@ -22,6 +22,7 @@ export const useMazeDrawing = () => {
       solutionColor: string;
       solutionPath?: Position[];
       text: string;
+      perpendicularWalls: boolean;
     }
   ) => {
 
@@ -81,9 +82,10 @@ export const useMazeDrawing = () => {
         showArrows: boolean;
         solutionColor: string;
         solutionPath?: Position[];
+        perpendicularWalls?: boolean;
       }
     ) => {
-      const { wallColor, wallThickness, showArrows } = options;
+      const { wallColor, wallThickness, showArrows, perpendicularWalls = false } = options;
       
       ctx.strokeStyle = wallColor;
       ctx.lineWidth = wallThickness;
@@ -91,30 +93,24 @@ export const useMazeDrawing = () => {
       const centerX = ctx.canvas.width / 2;
       const centerY = ctx.canvas.height / 2;
       
-      // Calculate basic dimensions
       const rings = maze.length;
       const maxRadius = Math.min(centerX, centerY) * 0.8;
       const ringWidth = maxRadius / (rings + 1);
       const totalCells = maze[0]?.length || 0;
       
-      // Helper to get a point on a polygon at a given radius and progress (0 to 1)
       const getPointOnRing = (radius: number, progress: number): [number, number] => {
-        // Determine which side of the polygon we're on
-        const sideProgress = progress * sides; // Convert overall progress to progress within sides
+        const sideProgress = progress * sides;
         const currentSide = Math.floor(sideProgress);
         const progressInSide = sideProgress - currentSide;
         
-        // Get the start and end points of the current side
         const startAngle = (currentSide * 2 * Math.PI / sides) - (Math.PI / 2);
         const endAngle = ((currentSide + 1) * 2 * Math.PI / sides) - (Math.PI / 2);
         
-        // Calculate the points at the start and end of this side
         const startX = centerX + radius * Math.cos(startAngle);
         const startY = centerY + radius * Math.sin(startAngle);
         const endX = centerX + radius * Math.cos(endAngle);
         const endY = centerY + radius * Math.sin(endAngle);
         
-        // Interpolate between these points based on our progress along this side
         return [
           startX + (endX - startX) * progressInSide,
           startY + (endY - startY) * progressInSide
@@ -139,16 +135,14 @@ export const useMazeDrawing = () => {
       for (let ring = 0; ring < rings; ring++) {
         const currentRadius = (ring + 2) * ringWidth;
         
-        // Draw each cell in this ring
+        // First draw all circumferential (ring) walls
         for (let cell = 0; cell < totalCells; cell++) {
           const currentCell = maze[ring][cell];
           if (!currentCell) continue;
     
-          // Calculate progress through the ring for this cell and the next
           const cellProgress = cell / totalCells;
           const nextCellProgress = (cell + 1) / totalCells;
           
-          // Get current cell corners
           const outerStart = getPointOnRing(currentRadius, cellProgress);
           const outerEnd = getPointOnRing(currentRadius, nextCellProgress);
           const innerStart = getPointOnRing(currentRadius - ringWidth, cellProgress);
@@ -161,9 +155,41 @@ export const useMazeDrawing = () => {
             ctx.lineTo(...outerEnd);
             ctx.stroke();
           }
+        }
     
-          // Draw radial wall (between rings)
-          if (currentCell.eastWall) {
+        // Then draw all radial (east) walls
+        for (let cell = 0; cell < totalCells; cell++) {
+          const currentCell = maze[ring][cell];
+          if (!currentCell?.eastWall) continue;
+    
+          const cellProgress = cell / totalCells;
+          const nextCellProgress = (cell + 1) / totalCells;
+          
+          const outerStart = getPointOnRing(currentRadius, cellProgress);
+          const outerEnd = getPointOnRing(currentRadius, nextCellProgress);
+          const innerStart = getPointOnRing(currentRadius - ringWidth, cellProgress);
+          const innerEnd = getPointOnRing(currentRadius - ringWidth, nextCellProgress);
+    
+          if (perpendicularWalls) {
+            // Calculate tangent vector along the ring wall
+            const dirX = outerEnd[0] - outerStart[0];
+            const dirY = outerEnd[1] - outerStart[1];
+            
+            // Calculate normalized perpendicular vector
+            const length = Math.sqrt(dirX * dirX + dirY * dirY);
+            const perpX = -dirY / length;
+            const perpY = dirX / length;
+    
+            // Connect outer ring wall to inner ring wall along the perpendicular direction
+            ctx.beginPath();
+            ctx.moveTo(...outerEnd);
+            // Project the point inward to intersect with the inner ring
+            const intersectX = outerEnd[0] + perpX * ringWidth * 0.866; // cos(30°) ≈ 0.866
+            const intersectY = outerEnd[1] + perpY * ringWidth * 0.866;
+            ctx.lineTo(intersectX, intersectY);
+            ctx.stroke();
+          } else {
+            // Original radial walls
             ctx.beginPath();
             ctx.moveTo(...outerEnd);
             ctx.lineTo(...innerEnd);
@@ -181,11 +207,9 @@ export const useMazeDrawing = () => {
         for (let cell = 0; cell < totalCells; cell++) {
           const progress = (cell + 0.5) / totalCells;
           
-          // Handle entrance
           if (maze[rings - 1][cell]?.isEntrance) {
             const [x, y] = getPointOnRing(entranceRadius, progress);
             const [baseX, baseY] = getPointOnRing(entranceRadius - ringWidth, progress);
-            const angle = Math.atan2(y - centerY, x - centerX);
             
             drawArrow(
               ctx,
@@ -197,7 +221,6 @@ export const useMazeDrawing = () => {
             );
           }
           
-          // Handle exit
           if (maze[0][cell]?.isExit) {
             const [baseX, baseY] = getPointOnRing(exitRadius, progress);
             const angle = Math.atan2(baseY - centerY, baseX - centerX);
@@ -451,7 +474,7 @@ export const useMazeDrawing = () => {
     // };
 
     const { rows, columns, sides, cellSize, wallColor, backgroundColor,
-      wallThickness, showArrows, solutionColor, solutionPath, text } = options;
+      wallThickness, showArrows, solutionColor, solutionPath, text, perpendicularWalls } = options;
     const arrowPadding = getArrowPadding(cellSize);
 
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
@@ -473,7 +496,8 @@ export const useMazeDrawing = () => {
           wallThickness,
           showArrows,
           solutionColor,
-          solutionPath
+          solutionPath,
+          perpendicularWalls
         });
         break;
       case 'text':

@@ -382,6 +382,7 @@ const adjustMazeToPolygon = (
 
   return polygonMaze;
 };
+
 const addEntranceAndExit = (maze: Cell[][], rows: number, columns: number, frameType: string, settings: MazeSettings): Cell[][] => {
   const newMaze = JSON.parse(JSON.stringify(maze));
 

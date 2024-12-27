@@ -6,7 +6,6 @@ import { AccordionItem, AccordionTrigger, AccordionContent } from '../../ui/acco
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select';
 import { FrameType, AppearanceSettings } from '../../../utils/types';
 import { useMazeContext } from '../../../contexts/MazeContext';
-import { start } from 'repl';
 
 interface AppearanceSectionProps {
   frameType: FrameType;
@@ -23,14 +22,6 @@ export const AppearanceSection: React.FC<AppearanceSectionProps> = ({
 }) => {
   const { generateMaze } = useMazeContext();
 
-  const handleFrameTypeChange = (newType: FrameType) => {
-    setFrameType(newType);
-    sliderConfigs[newType]?.forEach((config) => {
-      onSettingChange(config.key as keyof AppearanceSettings, config.start);
-    });
-    generateMaze();
-  };
-
   const sliderConfigs = {
     square: [
       { key: 'rows', label: "Rows", value: settings.rows, min: 2, max: 200, start: 10 },
@@ -43,7 +34,6 @@ export const AppearanceSection: React.FC<AppearanceSectionProps> = ({
       { key: 'columns', label: "Sectors", value: settings.columns, min: 4, max: 100, start: 10 },
       { key: 'wallThickness', label: "Wall thickness", value: settings.wallThickness, min: 1, max: 10, start: 2 },
       { key: 'cellSize', label: "Zoom", value: settings.cellSize, min: 2, max: 80, start: 20 },
-      
     ],
     polygon: [
       { key: 'polygonSides', label: "Number of Sides", value: settings.polygonSides, min: 3, max: 20, step: 1, start: 5 },
@@ -51,7 +41,6 @@ export const AppearanceSection: React.FC<AppearanceSectionProps> = ({
       { key: 'columns', label: "Sectors", value: settings.columns, min: 4, max: 200, start: 10 },
       { key: 'wallThickness', label: "Wall thickness", value: settings.wallThickness, min: 1, max: 10, start: 2 },
       { key: 'cellSize', label: "Zoom", value: settings.cellSize, min: 2, max: 80, start: 20 },
-      
     ],
     text: [
       { key: 'letterSize', label: "Letter Size", value: settings.letterSize, min: 5, max: 20, start: 10 },
@@ -59,6 +48,34 @@ export const AppearanceSection: React.FC<AppearanceSectionProps> = ({
       { key: 'wallThickness', label: "Wall thickness", value: settings.wallThickness, min: 1, max: 10, start: 2 },
       { key: 'cellSize', label: "Zoom", value: settings.cellSize, min: 2, max: 80, start: 20 },
     ]
+  };
+
+  const handleFrameTypeChange = (newType: FrameType) => {
+    // First update the frame type
+    setFrameType(newType);
+
+    // Then update all the settings for the new frame type with their default values
+    if (sliderConfigs[newType]) {
+      const updates = sliderConfigs[newType].reduce((acc, config) => {
+        acc[config.key] = config.start;
+        return acc;
+      }, {} as Partial<AppearanceSettings>);
+
+      // Apply all settings updates at once
+      Object.entries(updates).forEach(([key, value]) => {
+        onSettingChange(key as keyof AppearanceSettings, value);
+      });
+
+      // Reset text when switching to/from text frame type
+      if (newType === 'text') {
+        onSettingChange('text', 'MAZE');
+      } else if (frameType === 'text') {
+        onSettingChange('text', '');
+      }
+    }
+
+    // Finally generate the maze with the new settings
+    generateMaze();
   };
 
   return (
@@ -110,9 +127,21 @@ export const AppearanceSection: React.FC<AppearanceSectionProps> = ({
             />
           ))}
 
+          {frameType === 'polygon' && (
+            <div className="flex items-center space-x-2">
+            <Checkbox
+              disabled={true}
+              checked={settings.perpendicularWalls}
+              label="Perpendicular Walls"
+              onChange={(checked: boolean) => onSettingChange('perpendicularWalls', checked)}
+            />
+          </div>
+          )}
+          
           <div className="flex items-center space-x-2">
             <Checkbox
               checked={settings.showArrows}
+              disabled={false}
               label="Show Entrance/Exit Arrows"
               onChange={(checked: boolean) => onSettingChange('showArrows', checked)}
             />
