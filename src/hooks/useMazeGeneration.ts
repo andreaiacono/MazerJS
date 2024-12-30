@@ -410,13 +410,13 @@ const addEntranceAndExit = (maze: Cell[][], rows: number, columns: number, frame
   const getPosition = (position: 'north' | 'south' | 'east' | 'west' | 'random'): [number, number] => {
     switch (position) {
       case 'north':
-        return [0, Math.floor(Math.random() * columns)];
+        return [0, 1 + Math.floor(Math.random() * (columns - 1))];
       case 'south':
         return [rows - 1, Math.floor(Math.random() * columns)];
       case 'east':
-        return [Math.floor(Math.random() * rows), columns - 1];
+        return [1 + Math.floor(Math.random() * (rows-2)), columns - 1];
       case 'west':
-        return [Math.floor(Math.random() * rows), 0];
+        return [1 + Math.floor(Math.random() * (rows-2)), 0];
       case 'random':
         const edge = ['north', 'south', 'east', 'west'][Math.floor(Math.random() * 4)];
         return getPosition(edge as 'north');
