@@ -38,7 +38,7 @@ export const AppearanceSection: React.FC<AppearanceSectionProps> = ({
     polygon: [
       { key: 'polygonSides', label: "Number of Sides", value: settings.polygonSides, min: 3, max: 20, step: 1, start: 5 },
       { key: 'rows', label: "Rings", value: settings.rows, min: 4, max: 100, start: 10 },
-      { key: 'columns', label: "Sectors", value: settings.columns, min: 4, max: 200, start: 10 },
+      { key: 'columns', label: "Sectors", value: settings.columns, min: 4, max: 200, start: 10, step: settings.polygonSides},
       { key: 'wallThickness', label: "Wall thickness", value: settings.wallThickness, min: 1, max: 10, start: 2 },
       { key: 'cellSize', label: "Zoom", value: settings.cellSize, min: 2, max: 80, start: 20 },
     ],
@@ -123,7 +123,7 @@ export const AppearanceSection: React.FC<AppearanceSectionProps> = ({
               }}
               min={config.min ?? 5}
               max={config.max ?? 80}
-              step={1}
+              step={config.step ?? 1}
             />
           ))}
 
