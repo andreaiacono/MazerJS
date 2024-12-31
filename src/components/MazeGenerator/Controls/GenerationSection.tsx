@@ -34,26 +34,37 @@ export const GenerationSection: React.FC<GenerationSectionProps> = ({
     start?: number
   }>> = {
     'binary': [
-      { key: 'horizontalBias', label: 'Horizontal Bias (%)', min: 0, max: 100, start: 50}
+      { key: 'horizontalBias', label: 'Horizontal Bias (%)', min: 0, max: 100, start: 50 }
     ],
     'sidewinder': [
-      { key: 'horizontalBias', label: 'Horizontal Bias (%)', min: 0, max: 100, start: 50},
-      { key: 'branchingProbability', label: 'Branching Probability (%)', min: 1, max: 100, start: 80}
+      { key: 'horizontalBias', label: 'Horizontal Bias (%)', min: 0, max: 100, start: 50 },
+      { key: 'branchingProbability', label: 'Branching Probability (%)', min: 1, max: 100, start: 80 }
     ],
     'recursive-backtracker': [
-      { key: 'branchingProbability', label: 'Branching Probability (%)', min: 40, max: 100, start: 85},
-      { key: 'deadEndDensity', label: 'Dead End Density (%)', min: 0, max: 100, start: 30}
+      { key: 'branchingProbability', label: 'Branching Probability (%)', min: 40, max: 100, start: 85 },
+      { key: 'deadEndDensity', label: 'Dead End Density (%)', min: 0, max: 100, start: 30 }
     ],
     'prims': [
-      { key: 'branchingProbability', label: 'Branching Probability (%)', min: 50, max: 100 , start: 95}
+      { key: 'branchingProbability', label: 'Branching Probability (%)', min: 50, max: 100, start: 95 }
     ],
     'recursive-division': [
-      { key: 'horizontalBias', label: 'Horizontal Bias (%)', min: 0, max: 100, start: 50}
+      { key: 'horizontalBias', label: 'Horizontal Bias (%)', min: 0, max: 100, start: 50 }
     ],
     'hunt-and-kill': [
-      { key: 'branchingProbability', label: 'Branching Probability (%)', min: 1, max: 100, start: 80},
-      { key: 'deadEndDensity', label: 'Dead End Density (%)', min: 0, max: 100, start: 40}
-    ]
+      { key: 'branchingProbability', label: 'Branching Probability (%)', min: 1, max: 100, start: 80 },
+      { key: 'deadEndDensity', label: 'Dead End Density (%)', min: 0, max: 100, start: 40 }
+    ],
+    'eller': [
+      { key: 'horizontalBias', label: 'Horizontal Bias (%)', min: 0, max: 100, start: 50 },
+      { key: 'branchingProbability', label: 'Branching Probability (%)', min: 1, max: 100, start: 80 },
+      { key: 'deadEndDensity', label: 'Dead End Density (%)', min: 0, max: 100, start: 40 }
+    ],
+    'wilson': [
+    ],
+    'kruskal': [
+    ],
+    'aldous-broder': [
+     ],
   };
 
   const selectConfigs = [
@@ -116,6 +127,10 @@ export const GenerationSection: React.FC<GenerationSectionProps> = ({
                   Recursive Division
                 </SelectItem>
                 <SelectItem value="hunt-and-kill">Hunt and Kill</SelectItem>
+                <SelectItem value="eller">Eller</SelectItem>
+                <SelectItem value="aldous-broder">Aldous-Broder</SelectItem>
+                <SelectItem value="wilson">Wilson</SelectItem>
+                <SelectItem value="kruskal">Kruskal</SelectItem>
               </SelectContent>
             </Select>
             <div className="mt-2 text-sm text-gray-600 whitespace-pre-line">

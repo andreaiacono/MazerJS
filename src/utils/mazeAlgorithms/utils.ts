@@ -15,6 +15,10 @@ export const createEmptyGrid = (rows: number, columns: number, createWalls: bool
   );
 };
 
+export const getRandomElement = <T>(array: T[]): T => {
+  return array[Math.floor(Math.random() * array.length)];
+};
+
 export const getRandomWithBias = (bias: number): boolean => {
   return Math.random() < bias;
 };

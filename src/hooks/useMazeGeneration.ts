@@ -6,7 +6,11 @@ import {
   recursiveBacktracker,
   primsAlgorithm,
   recursiveDivision,
-  huntAndKill
+  huntAndKill,
+  ellerMaze,
+  wilsonMaze,
+  aldousBroderMaze,
+  kruskalMaze
 } from '../utils/mazeAlgorithms';
 import { isPointInPolygon, getPolygonPoints } from '../utils/helpers/geometryHelpers';
 import { getLetterPixels } from './../utils/helpers/drawing';
@@ -18,7 +22,11 @@ const algorithmMap = {
   'recursive-backtracker': recursiveBacktracker,
   'prims': primsAlgorithm,
   'recursive-division': recursiveDivision,
-  'hunt-and-kill': huntAndKill
+  'hunt-and-kill': huntAndKill,
+  'eller': ellerMaze,
+  'wilson': wilsonMaze,
+  'kruskal': kruskalMaze,
+  'aldous-broder': aldousBroderMaze
 } as const;
 
 // Factory for creating empty cells
@@ -139,6 +147,7 @@ export const useMazeGeneration = (
     try {
       const validCells = generateValidCells(frameType);
 
+      console.log("rpws", rows)
       // Calculate dimensions based on frame type
       let effectiveRows = rows;
       let effectiveColumns = columns;
@@ -184,6 +193,30 @@ export const useMazeGeneration = (
           effectiveColumns,
           mazeSettings.branchingProbability,
           mazeSettings.deadEndDensity,
+        );
+      } else if (algorithm === 'eller') {
+        maze = ellerMaze(
+          effectiveRows,
+          effectiveColumns,
+          mazeSettings.horizontalBias,
+          mazeSettings.branchingProbability,
+          mazeSettings.deadEndDensity,
+
+        );
+      } else if (algorithm === 'wilson') {
+        maze = wilsonMaze(
+          effectiveRows,
+          effectiveColumns
+        );
+      } else if (algorithm === 'kruskal') {
+        maze = kruskalMaze(
+          effectiveRows,
+          effectiveColumns,
+        );
+      } else if (algorithm === 'aldous-broder') {
+        maze = aldousBroderMaze(
+          effectiveRows,
+          effectiveColumns,
         );
       }
       else {
@@ -414,9 +447,9 @@ const addEntranceAndExit = (maze: Cell[][], rows: number, columns: number, frame
       case 'south':
         return [rows - 1, Math.floor(Math.random() * columns)];
       case 'east':
-        return [1 + Math.floor(Math.random() * (rows-2)), columns - 1];
+        return [1 + Math.floor(Math.random() * (rows - 2)), columns - 1];
       case 'west':
-        return [1 + Math.floor(Math.random() * (rows-2)), 0];
+        return [1 + Math.floor(Math.random() * (rows - 2)), 0];
       case 'random':
         const edge = ['north', 'south', 'east', 'west'][Math.floor(Math.random() * 4)];
         return getPosition(edge as 'north');

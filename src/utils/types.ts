@@ -16,10 +16,10 @@ export interface Cell {
   radialWall?: boolean;
 }
 
-export type Wall = { 
-  x: number; 
-  y: number; 
-  isHorizontal: boolean 
+export type Wall = {
+  x: number;
+  y: number;
+  isHorizontal: boolean
 };
 
 export interface MazeSettings {
@@ -45,7 +45,7 @@ export interface AppearanceSettings {
   text: string;
   letterDistance: number;
   letterSize: number;
-  perpendicularWalls: boolean;
+  perpendicularWalls: boolean
 }
 
 export interface SolverSettings {
@@ -62,6 +62,6 @@ export interface SolvingState {
   exitCell?: Position;
 }
 
-export type MazeAlgorithm = 'binary' | 'sidewinder' | 'recursive-backtracker' | 'prims' | 'recursive-division' | 'hunt-and-kill';
+export type MazeAlgorithm = 'binary' | 'sidewinder' | 'recursive-backtracker' | 'prims' | 'recursive-division' | 'hunt-and-kill' | 'eller' | 'kruskal' | 'wilson' | 'aldous-broder';
 
 export type FrameType = 'square' | 'polygon' | 'circular' | 'text';
