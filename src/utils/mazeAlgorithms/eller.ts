@@ -6,7 +6,7 @@ export const ellerMaze = (
     columns: number, 
     horizontalBias: number = 50,
     branchingProbability: number = 50,
-    deadEndDensity: number = 50
+    verticalConnections: number = 50
   ): Cell[][] => {
     const grid = createEmptyGrid(rows, columns);
     let currentSet = 0;
@@ -15,7 +15,7 @@ export const ellerMaze = (
     
     horizontalBias /= 100;
     branchingProbability /= 100;
-    deadEndDensity /= 100;
+    verticalConnections /= 100;
   
     for (let row = 0; row < rows; row++) {
       // Assign sets to cells without one
@@ -58,13 +58,13 @@ export const ellerMaze = (
         for (const [set, cells] of setCells) {
           const minConnections = 1;
           const maxConnections = Math.ceil(cells.length * branchingProbability);
-          const verticalConnections = Math.max(
+          const verticalConns = Math.max(
             minConnections,
-            Math.floor(maxConnections * (1 - deadEndDensity))
+            Math.floor(maxConnections * (1 - verticalConnections))
           );
           
           const selectedCells = new Set(
-            Array.from({ length: verticalConnections }, 
+            Array.from({ length: verticalConns }, 
               () => getRandomElement(cells))
           );
           

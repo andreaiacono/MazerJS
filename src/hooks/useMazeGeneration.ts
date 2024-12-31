@@ -201,7 +201,6 @@ export const useMazeGeneration = (
           mazeSettings.horizontalBias,
           mazeSettings.branchingProbability,
           mazeSettings.deadEndDensity,
-
         );
       } else if (algorithm === 'wilson') {
         maze = wilsonMaze(

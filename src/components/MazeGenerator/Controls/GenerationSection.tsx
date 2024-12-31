@@ -57,7 +57,7 @@ export const GenerationSection: React.FC<GenerationSectionProps> = ({
     'eller': [
       { key: 'horizontalBias', label: 'Horizontal Bias (%)', min: 0, max: 100, start: 50 },
       { key: 'branchingProbability', label: 'Branching Probability (%)', min: 1, max: 100, start: 80 },
-      { key: 'deadEndDensity', label: 'Dead End Density (%)', min: 0, max: 100, start: 40 }
+      { key: 'deadEndDensity', label: 'Vertical Connections (%)', min: 0, max: 100, start: 40 }
     ],
     'wilson': [
     ],
