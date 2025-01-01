@@ -51,6 +51,8 @@ export const AppearanceSection: React.FC<AppearanceSectionProps> = ({
   };
 
   const handleFrameTypeChange = (newType: FrameType) => {
+    // First update the frame type
+    setFrameType(newType);
 
     // Then update all the settings for the new frame type with their default values
     if (sliderConfigs[newType]) {

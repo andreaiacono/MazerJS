@@ -45,7 +45,7 @@ export interface AppearanceSettings {
   text: string;
   letterDistance: number;
   letterSize: number;
-  perpendicularWalls: boolean
+  perpendicularWalls: boolean;
 }
 
 export interface SolverSettings {
