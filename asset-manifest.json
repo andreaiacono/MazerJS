@@ -1,13 +1,13 @@
 {
   "files": {
     "main.css": "/MazerJS/static/css/main.f841d61d.css",
-    "main.js": "/MazerJS/static/js/main.ea8a2915.js",
+    "main.js": "/MazerJS/static/js/main.75853d4a.js",
     "index.html": "/MazerJS/index.html",
     "main.f841d61d.css.map": "/MazerJS/static/css/main.f841d61d.css.map",
-    "main.ea8a2915.js.map": "/MazerJS/static/js/main.ea8a2915.js.map"
+    "main.75853d4a.js.map": "/MazerJS/static/js/main.75853d4a.js.map"
   },
   "entrypoints": [
     "static/css/main.f841d61d.css",
-    "static/js/main.ea8a2915.js"
+    "static/js/main.75853d4a.js"
   ]
 }
