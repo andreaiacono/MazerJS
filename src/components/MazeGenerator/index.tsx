@@ -39,18 +39,20 @@ const MazeGenerator: React.FC = () => {
 
   };
 
+
   const handleAppearanceSettingChange = (setting: keyof AppearanceSettings, value: any) => {
-    setAppearanceSettings((prev: AppearanceSettings) => ({
-      ...prev,
-      [setting]: value
-    }));
+    setAppearanceSettings(prev => {
+      const newSettings = {
+        ...prev,
+        [setting]: value
+      };
+      return newSettings;
+    });
+  }
 
-    // Only regenerate maze for structural changes
-    if (['rows', 'columns', 'polygonSides'].includes(setting)) {
-      generateMaze();
-    }
+  const handleSolverSettingChange = (setting: keyof SolverSettings, value: any) => {
+    updateSolverSettings({ [setting]: value });
   };
-
 
 
   useEffect(() => {
@@ -61,12 +63,23 @@ const MazeGenerator: React.FC = () => {
     appearanceSettings.wallColor,
     appearanceSettings.backgroundColor,
     appearanceSettings.wallThickness,
-    appearanceSettings.cellSize
+    appearanceSettings.cellSize,
+    appearanceSettings.perpendicularWalls,
   ]);
 
-  const handleSolverSettingChange = (setting: keyof SolverSettings, value: any) => {
-    updateSolverSettings({ [setting]: value });
-  };
+  useEffect(() => {
+    generateMaze();
+  }, [
+    frameType,
+    appearanceSettings.rows,
+    appearanceSettings.columns,
+    appearanceSettings.polygonSides,
+    appearanceSettings.letterSize,
+    appearanceSettings.letterDistance,
+    appearanceSettings.text,
+    appearanceSettings.upperLetterConnector,
+    appearanceSettings.lowerLetterConnector,
+  ]);
 
   return (
     <div className="flex h-screen bg-gray-100">
@@ -110,6 +123,11 @@ const MazeGenerator: React.FC = () => {
             sides={appearanceSettings.polygonSides}
             solutionPath={solutionPath}
             text={appearanceSettings.text}
+            perpendicularWalls={appearanceSettings.perpendicularWalls}
+            letterSize={appearanceSettings.letterSize}
+            letterDistance={appearanceSettings.letterDistance}
+            upperLetterConnector={appearanceSettings.upperLetterConnector}
+            lowerLetterConnector={appearanceSettings.lowerLetterConnector}
           />
         </div>
       </div>

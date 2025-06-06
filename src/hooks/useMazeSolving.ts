@@ -79,7 +79,7 @@ export const useMazeSolving = (
 
         try {
           await Promise.race([
-            delay(101 - speedRef.current),
+            delay(100 - speedRef.current),
             new Promise((_, reject) => {
               signal.addEventListener('abort', () => reject(new Error('Animation aborted')));
             })

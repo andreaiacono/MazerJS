@@ -1,6 +1,6 @@
-// import { Position } from '../types';
+import { ArrowDirection } from "../types";
 
-export const getArrowPadding = (cellSize: number) => Math.max(cellSize * 1.7, 20);
+export const getArrowPadding = (cellSize: number) => Math.max(cellSize * 1.7, 50);
 
 export const drawLine = (
   ctx: CanvasRenderingContext2D,
@@ -15,98 +15,130 @@ export const drawLine = (
   ctx.stroke();
 };
 
-export const drawArrow = (
-  ctx: CanvasRenderingContext2D,
-  fromX: number,
-  fromY: number,
-  toX: number,
-  toY: number,
-  arrowColor: string,
+export const getArrowDirection = (
+  row: number,
+  col: number,
+  mazeRows: number,
+  mazeCols: number
+): ArrowDirection => {
+  if (row === 0) return 'up';
+  if (row === mazeRows - 1) return 'down';
+  if (col === 0) return 'left';
+  if (col === mazeCols - 1) return 'right';
   
-) => {
-  ctx.strokeStyle = arrowColor;
-  const initialWidth = ctx.lineWidth
-  ctx.lineWidth = 3
-  const angle = Math.atan2(toY - fromY, toX - fromX);
-  const headlen = (toX - fromX) / 3
-  // Draw the line
-  ctx.beginPath();
-  ctx.moveTo(fromX, fromY);
-  ctx.lineTo(toX -headlen, toY);
-  ctx.stroke();
-
-  // Calculate arrowhead points
-  const arrowX = toX - headlen * Math.cos(angle);
-  const arrowY = toY - headlen * Math.sin(angle);
-
-  // Draw the arrowhead
-  ctx.beginPath();
-  ctx.fillStyle = arrowColor;
-  ctx.moveTo(toX, toY);
-  ctx.lineTo(
-    arrowX - headlen * Math.cos(angle - Math.PI / 6),
-    arrowY - headlen * Math.sin(angle - Math.PI / 6)
-  );
-  ctx.lineTo(
-    arrowX - headlen * Math.cos(angle + Math.PI / 6),
-    arrowY - headlen * Math.sin(angle + Math.PI / 6)
-  );
-  ctx.lineTo(toX, toY); // Connect back to the tip
-  ctx.closePath();
-  ctx.fill();
-  ctx.lineWidth = initialWidth
+  const centerRow = Math.floor(mazeRows / 2);
+  const centerCol = Math.floor(mazeCols / 2);
+  const rowDist = Math.abs(row - centerRow);
+  const colDist = Math.abs(col - centerCol);
+  
+  if (rowDist >= colDist) {
+    return row < centerRow ? 'up' : 'down';
+  } else {
+    return col < centerCol ? 'left' : 'right';
+  }
 };
 
+interface ArrowPoints {
+  fromX: number;
+  fromY: number;
+  toX: number;
+  toY: number;
+}
 
-export const getLetterPixels = (text: string, dimensions: { width: number; height: number }) => {
-  const canvas = document.createElement('canvas');
-  const ctx = canvas.getContext('2d');
-  if (!ctx) return new Set<string>();
+export const drawArrowShape = (
+  ctx: CanvasRenderingContext2D,
+  points: ArrowPoints,
+  arrowSize: number,
+  color: string
+) => {
+  const { fromX, fromY, toX, toY } = points;
+  const originalWidth = ctx.lineWidth;
+  const headLength = arrowSize / 2;
+  const angle = Math.atan2(toY - fromY, toX - fromX);
 
-  canvas.width = dimensions.width;
-  canvas.height = dimensions.height;
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 2;
+
+  // Draw arrow shaft
+  ctx.beginPath();
+  ctx.moveTo(fromX, fromY);
+  ctx.lineTo(toX, toY);
+  ctx.stroke();
+
+  // Draw arrow head
+  ctx.beginPath();
+  ctx.moveTo(toX, toY);
+  ctx.lineTo(
+    toX - headLength * Math.cos(angle - Math.PI / 6),
+    toY - headLength * Math.sin(angle - Math.PI / 6)
+  );
+  ctx.moveTo(toX, toY);
+  ctx.lineTo(
+    toX - headLength * Math.cos(angle + Math.PI / 6),
+    toY - headLength * Math.sin(angle + Math.PI / 6)
+  );
+  ctx.stroke();
+
+  ctx.lineWidth = originalWidth;
+};
+
+export const drawArrow = (
+  ctx: CanvasRenderingContext2D,
+  row: number,
+  col: number,
+  cellSize: number,
+  isEntrance: boolean,
+  color: string,
+  mazeRows: number,
+  mazeCols: number,
+  arrowDirection: ArrowDirection = getArrowDirection(row, col, mazeRows, mazeCols)
+) => {
+  const centerX = (col + 0.5) * cellSize;
+  const centerY = (row + 0.5) * cellSize;
+  const arrowSize = Math.max(20, cellSize * 0.6);
+  const arrowDistance = 10;
   
-  // Clear background
-  ctx.fillStyle = 'white';
-  ctx.fillRect(0, 0, dimensions.width, dimensions.height);
+  const isBorderCell = row === 0 || row === mazeRows - 1 || col === 0 || col === mazeCols - 1;
+  const offset = isBorderCell ? arrowDistance : cellSize / 4;
 
-  // Set up text properties
-  const fontSize = dimensions.height * 0.8;
-  ctx.font = `900 ${fontSize}px "Times New Roman"`;
-  ctx.textBaseline = 'middle';
-  
-  // Calculate text positioning
-  const letterWidths = text.split('').map(l => ctx.measureText(l).width);
-  // const totalWidth = letterWidths.reduce((a, b) => a + b, 0);
-  const spacing = -fontSize * 0.08;
-  const baseX = dimensions.width * 0.1; // 10% padding from left
+  let points: ArrowPoints = { fromX: 0, fromY: 0, toX: 0, toY: 0 };
 
-  // Draw text with stroke effect
-  text.split('').forEach((letter, i) => {
-    const x = baseX + letterWidths.slice(0, i).reduce((a, b) => a + b, 0) + spacing * i;
-    
-    // Draw outlined text
-    ctx.strokeStyle = 'black';
-    ctx.lineWidth = fontSize * 0.15;  // Thicker outline
-    ctx.strokeText(letter, x, dimensions.height/2);
-    
-    // Fill text
-    ctx.fillStyle = 'black';
-    ctx.fillText(letter, x, dimensions.height/2);
-  });
-
-  // Convert to pixel map
-  const pixels = new Set<string>();
-  const imageData = ctx.getImageData(0, 0, dimensions.width, dimensions.height);
-  
-  for (let y = 0; y < dimensions.height; y++) {
-    for (let x = 0; x < dimensions.width; x++) {
-      const idx = (y * dimensions.width + x) * 4;
-      if (imageData.data[idx] < 128) {  // Check if pixel is dark
-        pixels.add(`${x},${y}`);
-      }
-    }
+  switch (arrowDirection) {
+    case 'up':
+      points = {
+        fromX: centerX,
+        toX: centerX,
+        fromY: isEntrance ? centerY - arrowSize - offset : centerY - offset,
+        toY: isEntrance ? centerY - offset : centerY - arrowSize - offset
+      };
+      break;
+    case 'down':
+      points = {
+        fromX: centerX,
+        toX: centerX,
+        fromY: isEntrance ? centerY + arrowSize + offset : centerY + offset,
+        toY: isEntrance ? centerY + offset : centerY + arrowSize + offset
+      };
+      break;
+    case 'left':
+      const rightOffset = cellSize;
+      points = {
+        fromY: centerY,
+        toY: centerY,
+        fromX: isEntrance ? centerX + rightOffset - arrowSize - offset : centerX + rightOffset - offset,
+        toX: isEntrance ? centerX + rightOffset - offset : centerX + rightOffset - arrowSize - offset
+      };
+      break;
+    case 'right':
+      const leftOffset = -cellSize;
+      points = {
+        fromY: centerY,
+        toY: centerY,
+        fromX: isEntrance ? centerX + leftOffset + arrowSize + offset : centerX + leftOffset + offset,
+        toX: isEntrance ? centerX + leftOffset + offset : centerX + leftOffset + arrowSize + offset
+      };
+      break;
   }
 
-  return pixels;
+  drawArrowShape(ctx, points, arrowSize, color);
 };

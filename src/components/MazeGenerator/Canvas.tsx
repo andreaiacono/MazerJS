@@ -2,6 +2,7 @@ import React, { useRef, useEffect } from 'react';
 import { Cell, FrameType, Position } from '../../utils/types';
 import { getArrowPadding } from '../../utils/helpers/drawing';
 import { useMazeDrawing } from '../../hooks/useMazeDrawing';
+import { getMazeDimensions } from '../../utils/helpers/misc';
 
 interface CanvasProps {
   maze: Cell[][];
@@ -17,6 +18,11 @@ interface CanvasProps {
   sides: number;
   solutionPath?: Position[];
   text: string;
+  perpendicularWalls: boolean;
+  letterSize: number;
+  letterDistance: number;
+  upperLetterConnector: boolean;
+  lowerLetterConnector: boolean;
 }
 
 export const Canvas: React.FC<CanvasProps> = ({
@@ -32,7 +38,12 @@ export const Canvas: React.FC<CanvasProps> = ({
   showArrows,
   sides,
   solutionPath,
-  text
+  text,
+  perpendicularWalls,
+  letterSize,
+  letterDistance,
+  upperLetterConnector,
+  lowerLetterConnector
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { drawMaze } = useMazeDrawing();
@@ -40,10 +51,17 @@ export const Canvas: React.FC<CanvasProps> = ({
   const getCanvasDimensions = () => {
     const arrowPadding = getArrowPadding(cellSize);
 
-    if (frameType === 'circular') {
+    if (frameType === 'circular' || frameType === 'polygon') {
       return {
         width: 20 * cellSize + (2 * arrowPadding),
         height: 20 * cellSize + (2 * arrowPadding)
+      };
+    }
+    else if (frameType === 'text') {
+      const dimension = getMazeDimensions(letterSize, letterDistance, text)
+      return {
+        width: dimension.width * cellSize + (2 * arrowPadding),
+        height: dimension.height * cellSize + (2 * arrowPadding)
       };
     }
 
@@ -66,7 +84,7 @@ export const Canvas: React.FC<CanvasProps> = ({
     }
 
     const { width, height } = getCanvasDimensions();
-    
+
     // Set canvas dimensions
     canvas.width = width;
     canvas.height = height;
@@ -83,10 +101,11 @@ export const Canvas: React.FC<CanvasProps> = ({
       showArrows,
       solutionColor,
       solutionPath,
-      text
+      text,
+      perpendicularWalls
     });
-  }, [maze, frameType, rows, columns, cellSize, wallColor, backgroundColor, 
-      wallThickness, showArrows, sides, solutionColor, drawMaze, solutionPath, text]);
+  }, [maze, frameType, rows, columns, cellSize, wallColor, backgroundColor,
+    wallThickness, showArrows, sides, solutionColor, drawMaze, solutionPath, text, perpendicularWalls]);
 
   const { width, height } = getCanvasDimensions();
   const arrowPadding = getArrowPadding(cellSize);
@@ -98,8 +117,8 @@ export const Canvas: React.FC<CanvasProps> = ({
       height={height}
       style={{
         backgroundColor,
-        margin: -arrowPadding,
-        border: '2px solid #ccc'
+        margin: 0,
+        border: '5px solid #0F0',
       }}
     />
   );

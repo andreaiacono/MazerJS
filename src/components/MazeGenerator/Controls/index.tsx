@@ -59,6 +59,7 @@ export const Controls: React.FC<ControlsProps> = ({
                 setAlgorithm={setAlgorithm}
                 mazeSettings={mazeSettings}
                 onMazeSettingChange={onMazeSettingChange}
+                frameType={frameType}
               />
               <AppearanceSection
                 frameType={frameType}

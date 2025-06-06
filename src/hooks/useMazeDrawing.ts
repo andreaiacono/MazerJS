@@ -1,8 +1,6 @@
 import { useCallback } from 'react';
 import { Cell, FrameType, Position } from '../utils/types';
-import { drawLine, drawArrow, getArrowPadding } from '../utils/helpers/drawing';
-import { isPointInPolygon, getPolygonPoints, distanceToLineSegment } from '../utils/helpers/geometryHelpers';
-// import { getLetterPixels } from './../utils/helpers/drawing'
+import { drawArrow, drawLine, getArrowPadding, drawArrowShape } from '../utils/helpers/drawing';
 
 export const useMazeDrawing = () => {
 
@@ -22,6 +20,7 @@ export const useMazeDrawing = () => {
       solutionColor: string;
       solutionPath?: Position[];
       text: string;
+      perpendicularWalls: boolean;
     }
   ) => {
 
@@ -52,20 +51,186 @@ export const useMazeDrawing = () => {
             const mazeWidth = columns * cellSize;
             const arrowLength = cellSize * 1.2;
             if (cell.isEntrance) {
-              if (col === 0) {
-                drawArrow(ctx, -arrowLength, y + arrowLength / 2, 0, y + arrowLength / 2, arrowColor);
-              }
+                drawArrow(ctx, row, col, cellSize, true, arrowColor, maze.length, maze[row].length);
             }
-
             if (cell.isExit) {
-              if (col === maze[row].length - 1) {
-                drawArrow(ctx, mazeWidth, y + arrowLength / 2, mazeWidth + arrowLength, y + arrowLength / 2, arrowColor);
-              }
+                drawArrow(ctx, row, col, cellSize, false, arrowColor, maze.length, maze[row].length);
             }
           }
         }
       }
     }
+
+    const drawPolygonMaze = (
+      ctx: CanvasRenderingContext2D,
+      maze: Cell[][],
+      rows: number,
+      columns: number,
+      sides: number,
+      cellSize: number,
+      options: {
+        wallColor: string;
+        backgroundColor: string;
+        wallThickness: number;
+        showArrows: boolean;
+        solutionColor: string;
+        solutionPath?: Position[];
+        perpendicularWalls?: boolean;
+      }
+    ) => {
+      const { wallColor, wallThickness, showArrows, perpendicularWalls = false } = options;
+
+      ctx.strokeStyle = wallColor;
+      ctx.lineWidth = wallThickness;
+
+      const centerX = ctx.canvas.width / 2;
+      const centerY = ctx.canvas.height / 2;
+
+      const rings = maze.length;
+      const maxRadius = Math.min(centerX, centerY) * 0.8;
+      const ringWidth = maxRadius / (rings + 1);
+      const totalCells = maze[0]?.length || 0;
+
+      const getPointOnRing = (radius: number, progress: number): [number, number] => {
+        const sideProgress = progress * sides;
+        const currentSide = Math.floor(sideProgress);
+        const progressInSide = sideProgress - currentSide;
+
+        const startAngle = (currentSide * 2 * Math.PI / sides) - (Math.PI / 2);
+        const endAngle = ((currentSide + 1) * 2 * Math.PI / sides) - (Math.PI / 2);
+
+        const startX = centerX + radius * Math.cos(startAngle);
+        const startY = centerY + radius * Math.sin(startAngle);
+        const endX = centerX + radius * Math.cos(endAngle);
+        const endY = centerY + radius * Math.sin(endAngle);
+
+        return [
+          startX + (endX - startX) * progressInSide,
+          startY + (endY - startY) * progressInSide
+        ];
+      };
+
+      // Draw inner polygon
+      const innerRadius = ringWidth;
+      ctx.beginPath();
+      for (let i = 0; i <= sides; i++) {
+        const progress = i / sides;
+        const [x, y] = getPointOnRing(innerRadius, progress);
+        if (i === 0) {
+          ctx.moveTo(x, y);
+        } else {
+          ctx.lineTo(x, y);
+        }
+      }
+      ctx.stroke();
+
+      // Draw each ring of the maze
+      for (let ring = 0; ring < rings; ring++) {
+        const currentRadius = (ring + 2) * ringWidth;
+
+        // First draw all circumferential (ring) walls
+        for (let cell = 0; cell < totalCells; cell++) {
+          const currentCell = maze[ring][cell];
+          if (!currentCell) continue;
+
+          const cellProgress = cell / totalCells;
+          const nextCellProgress = (cell + 1) / totalCells;
+
+          const outerStart = getPointOnRing(currentRadius, cellProgress);
+          const outerEnd = getPointOnRing(currentRadius, nextCellProgress);
+          const innerStart = getPointOnRing(currentRadius - ringWidth, cellProgress);
+          const innerEnd = getPointOnRing(currentRadius - ringWidth, nextCellProgress);
+
+          // Draw circumferential wall (along the ring)
+          if (currentCell.southWall) {
+            ctx.beginPath();
+            ctx.moveTo(...outerStart);
+            ctx.lineTo(...outerEnd);
+            ctx.stroke();
+          }
+        }
+
+        // Then draw all radial (east) walls
+        for (let cell = 0; cell < totalCells; cell++) {
+          const currentCell = maze[ring][cell];
+          if (!currentCell?.eastWall) continue;
+
+          const cellProgress = cell / totalCells;
+          const nextCellProgress = (cell + 1) / totalCells;
+
+          const outerStart = getPointOnRing(currentRadius, cellProgress);
+          const outerEnd = getPointOnRing(currentRadius, nextCellProgress);
+          const innerStart = getPointOnRing(currentRadius - ringWidth, cellProgress);
+          const innerEnd = getPointOnRing(currentRadius - ringWidth, nextCellProgress);
+
+          // if (perpendicularWalls) {          
+          if (false) {
+            // Calculate tangent vector along the ring wall
+            const dirX = outerEnd[0] - outerStart[0];
+            const dirY = outerEnd[1] - outerStart[1];
+
+            // Calculate normalized perpendicular vector
+            const length = Math.sqrt(dirX * dirX + dirY * dirY);
+            const perpX = -dirY / length;
+            const perpY = dirX / length;
+
+            // Connect outer ring wall to inner ring wall along the perpendicular direction
+            ctx.beginPath();
+            ctx.moveTo(...outerEnd);
+            // Project the point inward to intersect with the inner ring
+            const intersectX = outerEnd[0] + perpX * ringWidth * 0.866; // cos(30°) ≈ 0.866
+            const intersectY = outerEnd[1] + perpY * ringWidth * 0.866;
+            ctx.lineTo(intersectX, intersectY);
+            ctx.stroke();
+          } else {
+            // Original radial walls
+            ctx.beginPath();
+            ctx.moveTo(...outerEnd);
+            ctx.lineTo(...innerEnd);
+            ctx.stroke();
+          }
+        }
+      }
+
+      // Draw entrance/exit arrows if enabled
+      // if (showArrows) {
+      //   const arrowLength = ringWidth * 0.8;
+      //   const entranceRadius = (rings + 1) * ringWidth;
+      //   const exitRadius = ringWidth;
+
+      //   for (let cell = 0; cell < totalCells; cell++) {
+      //     const progress = (cell + 0.5) / totalCells;
+
+      //     if (maze[rings - 1][cell]?.isEntrance) {
+      //       const [x, y] = getPointOnRing(entranceRadius, progress);
+      //       const [baseX, baseY] = getPointOnRing(entranceRadius - ringWidth, progress);
+
+      //       drawArrow(
+      //         ctx,
+      //         x,
+      //         y,
+      //         baseX,
+      //         baseY,
+      //         wallColor
+      //       );
+      //     }
+
+      //     if (maze[0][cell]?.isExit) {
+      //       const [baseX, baseY] = getPointOnRing(exitRadius, progress);
+      //       const angle = Math.atan2(baseY - centerY, baseX - centerX);
+
+      //       drawArrow(
+      //         ctx,
+      //         baseX,
+      //         baseY,
+      //         baseX - arrowLength * Math.cos(angle),
+      //         baseY - arrowLength * Math.sin(angle),
+      //         wallColor
+      //       );
+      //     }
+      //   }
+      // }
+    };
 
     const drawCircularMaze = (
       ctx: CanvasRenderingContext2D,
@@ -172,237 +337,35 @@ export const useMazeDrawing = () => {
             const angle = ((sector + 0.5) * 2 * Math.PI) / sectors;
 
             if (cell.isEntrance) {
-              drawArrow(
+              // drawArrow(ctx, 0, sector, cellSize, false, wallColor, rows, columns, 'right');
+              const points = {
+                fromY: centerY + (outerRadius + arrowLength) * Math.sin(angle),
+                toY: centerY + outerRadius * Math.sin(angle) + cellSize/2,
+                fromX:  centerX + (outerRadius + arrowLength) * Math.cos(angle),
+                toX: centerX + outerRadius * Math.cos(angle),
+              };   
+              drawArrowShape(
                 ctx,
-                centerX + (outerRadius + arrowLength) * Math.cos(angle),
-                centerY + (outerRadius + arrowLength) * Math.sin(angle),
-                centerX + outerRadius * Math.cos(angle),
-                centerY + outerRadius * Math.sin(angle),
+                points,
+                Math.max(20, cellSize * 0.6),
                 wallColor
               );
             }
             if (cell.isExit) {
-              drawArrow(
+              const points = {
+                fromY: centerY + outerRadius * Math.sin(angle) - cellSize/2,
+                toY: centerY + (outerRadius + arrowLength) * Math.sin(angle),
+                fromX:  centerX + outerRadius * Math.cos(angle),
+                toX: centerX + (outerRadius + arrowLength) * Math.cos(angle),
+              };   
+              drawArrowShape(
                 ctx,
-                centerX + outerRadius * Math.cos(angle),
-                centerY + outerRadius * Math.sin(angle),
-                centerX + (outerRadius + arrowLength) * Math.cos(angle),
-                centerY + (outerRadius + arrowLength) * Math.sin(angle),
+                points,
+                Math.max(20, cellSize * 0.6),
                 wallColor
               );
             }
           }
-        }
-      }
-    };
-
-    const drawPolygonMaze = (
-      ctx: CanvasRenderingContext2D,
-      maze: Cell[][],
-      rows: number,
-      columns: number,
-      sides: number,
-      cellSize: number,
-      wallColor: string,
-      showArrows: boolean
-    ) => {
-      if (!maze || maze.length === 0 || !maze[0]) return;
-
-      const mazeWidth = columns * cellSize;
-      const mazeHeight = rows * cellSize;
-      const centerX = mazeWidth / 2;
-      const centerY = mazeHeight / 2;
-      const radius = Math.min(mazeWidth, mazeHeight) / 2 * 0.8;
-
-      // Calculate polygon points
-      const points = getPolygonPoints(sides, radius, centerX, centerY);
-
-      // Find entrance and exit points and their sides
-      let entranceInfo: { point: [number, number], sideStart: [number, number], sideEnd: [number, number] } | null = null;
-      let exitInfo: { point: [number, number], sideStart: [number, number], sideEnd: [number, number] } | null = null;
-
-      // Find entrance and exit cells
-      for (let row = 0; row < rows; row++) {
-        for (let col = 0; col < columns; col++) {
-          const cell = maze[row]?.[col];
-          if (!cell) continue;
-
-          const cellCenterX = col * cellSize + cellSize / 2;
-          const cellCenterY = row * cellSize + cellSize / 2;
-
-          if (isPointInPolygon(cellCenterX, cellCenterY, points)) {
-            if (cell.isEntrance || cell.isExit) {
-              // Find nearest polygon side
-              let minDist = Infinity;
-              let nearestSideStart: [number, number] | null = null;
-              let nearestSideEnd: [number, number] | null = null;
-
-              for (let i = 0; i < points.length; i++) {
-                const start = points[i];
-                const end = points[(i + 1) % points.length];
-                const dist = distanceToLineSegment(
-                  cellCenterX,
-                  cellCenterY,
-                  start[0],
-                  start[1],
-                  end[0],
-                  end[1]
-                );
-                if (dist < minDist) {
-                  minDist = dist;
-                  nearestSideStart = start;
-                  nearestSideEnd = end;
-                }
-              }
-
-              if (nearestSideStart && nearestSideEnd) {
-                // Calculate intersection point with the polygon side
-                const midX = (nearestSideStart[0] + nearestSideEnd[0]) / 2;
-                const midY = (nearestSideStart[1] + nearestSideEnd[1]) / 2;
-
-                const info = {
-                  point: [midX, midY] as [number, number],
-                  sideStart: nearestSideStart,
-                  sideEnd: nearestSideEnd
-                };
-
-                if (cell.isEntrance) {
-                  entranceInfo = info;
-                } else {
-                  exitInfo = info;
-                }
-              }
-            }
-          }
-        }
-      }
-
-      // Set up clipping region for the maze
-      ctx.save();
-      ctx.beginPath();
-      ctx.moveTo(points[0][0], points[0][1]);
-      for (let i = 1; i < points.length; i++) {
-        ctx.lineTo(points[i][0], points[i][1]);
-      }
-      ctx.closePath();
-      ctx.clip();
-
-      // Draw the maze cells
-      for (let row = 0; row < rows; row++) {
-        for (let col = 0; col < columns; col++) {
-          if (!maze[row]?.[col]) continue;
-
-          const cell = maze[row][col];
-          const x = col * cellSize;
-          const y = row * cellSize;
-          const cellCenterX = x + cellSize / 2;
-          const cellCenterY = y + cellSize / 2;
-
-          if (isPointInPolygon(cellCenterX, cellCenterY, points)) {
-            const extensionLength = cellSize * 0.1;
-
-            if (cell.northWall) drawLine(ctx, x - extensionLength, y, x + cellSize + extensionLength, y);
-            if (cell.eastWall) drawLine(ctx, x + cellSize, y - extensionLength, x + cellSize, y + cellSize + extensionLength);
-            if (cell.southWall) drawLine(ctx, x - extensionLength, y + cellSize, x + cellSize + extensionLength, y + cellSize);
-            if (cell.westWall) drawLine(ctx, x, y - extensionLength, x, y + cellSize + extensionLength);
-          }
-        }
-      }
-
-      // Remove clipping and draw the polygon border with gaps for entrance/exit
-      ctx.restore();
-
-      // Draw the polygon border with gaps for entrance/exit
-      ctx.beginPath();
-      for (let i = 0; i <= points.length; i++) {
-        const start = points[i];
-        const end = points[(i + 1) % points.length];
-
-        // Check if this side contains entrance or exit
-        const isEntranceSide = entranceInfo &&
-          start === entranceInfo.sideStart &&
-          end === entranceInfo.sideEnd;
-        const isExitSide = exitInfo &&
-          start === exitInfo.sideStart &&
-          end === exitInfo.sideEnd;
-
-        if (isEntranceSide || isExitSide) {
-          // Draw the side with a gap
-          const info = isEntranceSide ? entranceInfo! : exitInfo!;
-          const gapSize = cellSize;
-
-          // Calculate unit vector along the side
-          const dx = end[0] - start[0];
-          const dy = end[1] - start[1];
-          const length = Math.sqrt(dx * dx + dy * dy);
-          const unitX = dx / length;
-          const unitY = dy / length;
-
-          // Calculate gap points
-          const midX = info.point[0];
-          const midY = info.point[1];
-          const gapStart: [number, number] = [
-            midX - (gapSize / 2) * unitX,
-            midY - (gapSize / 2) * unitY
-          ];
-          const gapEnd: [number, number] = [
-            midX + (gapSize / 2) * unitX,
-            midY + (gapSize / 2) * unitY
-          ];
-
-          // Draw the two segments of the side
-          ctx.lineTo(gapStart[0], gapStart[1]);
-          ctx.moveTo(gapEnd[0], gapEnd[1]);
-          ctx.lineTo(end[0], end[1]);
-        } else {
-          // Draw the full side
-          ctx.lineTo(end[0], end[1]);
-        }
-      }
-      ctx.strokeStyle = wallColor;
-      ctx.lineWidth = 2;
-      ctx.stroke();
-
-      // Draw arrows if enabled
-      if (showArrows && (entranceInfo || exitInfo)) {
-        const arrowLength = cellSize * 2; // Increase arrow length
-
-        if (entranceInfo) {
-          const { point, sideStart, sideEnd } = entranceInfo;
-          const dx = sideEnd[0] - sideStart[0];
-          const dy = sideEnd[1] - sideStart[1];
-          const length = Math.sqrt(dx * dx + dy * dy);
-          const perpX = -dy / length;  // Perpendicular vector pointing inward
-          const perpY = dx / length;
-
-          // Draw entrance arrow from outside to the gap
-          drawArrow(
-            ctx,
-            point[0] - perpX * arrowLength,  // Start further outside
-            point[1] - perpY * arrowLength,
-            point[0],                        // End at the border
-            point[1],
-            wallColor
-          );
-        }
-
-        if (exitInfo) {
-          const { point, sideStart, sideEnd } = exitInfo;
-          const dx = sideEnd[0] - sideStart[0];
-          const dy = sideEnd[1] - sideStart[1];
-          const length = Math.sqrt(dx * dx + dy * dy);
-          const perpX = -dy / length;  // Perpendicular vector pointing inward
-          const perpY = dx / length;
-
-          // Draw exit arrow from the gap to outside
-          drawArrow(
-            ctx,
-            point[0],                        // Start at the border
-            point[1],
-            point[0] - perpX * arrowLength,  // End further outside
-            point[1] - perpY * arrowLength,
-            wallColor
-          );
         }
       }
     };
@@ -411,114 +374,56 @@ export const useMazeDrawing = () => {
       ctx: CanvasRenderingContext2D,
       maze: Cell[][],
       options: {
-        rows: number;
-        columns: number;
+        effectiveRows: number;
+        effectiveColumns: number;
         cellSize: number;
-        wallColor: string;
-        backgroundColor: string;
-        wallThickness: number;
         solutionColor: string;
+        wallColor: string;
         showArrows: boolean;
-        text: string;
+      }) => {     const { effectiveRows, effectiveColumns, cellSize, solutionColor, showArrows } = options;
+    
+      if (maze == null) {
+        return;
       }
-    ) => {
-      const { cellSize, wallColor, wallThickness } = options;
-      const pixels = getLetterPixels(options.text, { width: Math.max(10, 50 * options.text.length), height: options.rows });
-
-      // Draw walls
-      Array.from({ length: options.rows + 1 }, (_, y) =>
-        Array.from({ length: options.columns + 1 }, (_, x) => {
-          const shouldDrawHorizontal = y < options.rows && shouldShowWall(x, y, true, pixels);
-          const shouldDrawVertical = x < options.columns && shouldShowWall(x, y, false, pixels);
-
-          ctx.strokeStyle = wallColor;
-          ctx.lineWidth = wallThickness;
-
-          if (shouldDrawHorizontal && maze[y]?.[x]?.northWall) {
-            ctx.beginPath();
-            ctx.moveTo(x * cellSize, y * cellSize);
-            ctx.lineTo((x + 1) * cellSize, y * cellSize);
-            ctx.stroke();
-          }
-
-          if (shouldDrawVertical && maze[y]?.[x]?.westWall) {
-            ctx.beginPath();
-            ctx.moveTo(x * cellSize, y * cellSize);
-            ctx.lineTo(x * cellSize, (y + 1) * cellSize);
-            ctx.stroke();
-          }
-        })
-      );
-
-      // // Draw solution path if it exists
-      // if (options.solutionPath?.length) {
-      //   ctx.strokeStyle = options.solutionColor;
-      //   ctx.lineWidth = cellSize / 3;
-      //   ctx.lineCap = 'round';
-      //   ctx.lineJoin = 'round';
-
-      //   ctx.beginPath();
-      //   options.solutionPath.forEach((pos, index) => {
-      //     const x = (pos.col + 0.5) * cellSize;
-      //     const y = (pos.row + 0.5) * cellSize;
-      //     if (index === 0) ctx.moveTo(x, y);
-      //     else ctx.lineTo(x, y);
-      //   });
-      //   ctx.stroke();
-      // }
-    };
-
-    const shouldShowWall = (x: number, y: number, isHorizontal: boolean, pixels: Set<string>) => {
-      if (isHorizontal) {
-        return pixels.has(`${x},${y}`) || (y > 0 && pixels.has(`${x},${y - 1}`));
-      } else {
-        return pixels.has(`${x},${y}`) || (x > 0 && pixels.has(`${x - 1},${y}`));
-      }
-    };
-
-    const getLetterPixels = (text: string, dimensions: { width: number; height: number }) => {
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return new Set<string>();
-
-      canvas.width = dimensions.width;
-      canvas.height = dimensions.height;
-      ctx.fillStyle = 'white';
-      ctx.fillRect(0, 0, dimensions.width, dimensions.height);
-
-      const fontSize = dimensions.height * 0.8;
-      ctx.font = `900 ${fontSize}px "Times New Roman"`;
-
-      const letterWidths = text.split('').map(l => ctx.measureText(l).width);
-      // const totalWidth = letterWidths.reduce((a, b) => a + b, 0);
-      const spacing = -fontSize * 0.08;
-      const baseX = fontSize;
-
-      text.split('').forEach((letter, i) => {
-        const x = baseX + letterWidths.slice(0, i).reduce((a, b) => a + b, 0) + spacing * i;
-        ctx.fillStyle = 'black';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(letter, x, dimensions.height / 2);
-      });
-
-      const pixels = new Set<string>();
-      const imageData = ctx.getImageData(0, 0, dimensions.width, dimensions.height);
-      for (let y = 0; y < dimensions.height; y++) {
-        for (let x = 0; x < dimensions.width; x++) {
-          if (imageData.data[(y * dimensions.width + x) * 4] < 128) {
-            pixels.add(`${x},${y}`);
+      // console.log("rows", rows, "coils", columns, "maze", maze)
+      // Draw only the walls for cells that are part of the text
+      for (let row = 0; row < maze.length; row++) {
+        if (!maze[row]) continue;
+        for (let col = 0; col < maze[row].length; col++) {
+          const cell = maze[row][col];
+          if (!cell.visited) continue;  // Skip cells that aren't part of the text
+    
+          const x = col * cellSize;
+          const y = row * cellSize;
+    
+          // Draw walls
+          if (cell.northWall) drawLine(ctx, x, y, x + cellSize, y);
+          if (cell.eastWall) drawLine(ctx, x + cellSize, y, x + cellSize, y + cellSize);
+          if (cell.southWall) drawLine(ctx, x, y + cellSize, x + cellSize, y + cellSize);
+          if (cell.westWall) drawLine(ctx, x, y, x, y + cellSize);
+    
+          // Draw entrance/exit arrows if enabled
+          if (showArrows) {
+            if (cell.isEntrance) {
+              drawArrow(ctx, row, col-2, cellSize, true, wallColor, rows, columns, 'left');
+            }
+            if (cell.isExit) {
+              drawArrow(ctx, row, col+2, cellSize, false, wallColor, rows, columns, 'right');
+            }
           }
         }
       }
-      return pixels;
     };
 
-    const { rows, columns, sides, cellSize, wallColor, backgroundColor, wallThickness, showArrows, solutionColor, solutionPath, text } = options;
+    const { rows, columns, sides, cellSize, wallColor, backgroundColor,
+      wallThickness, showArrows, solutionColor, solutionPath, text, perpendicularWalls } = options;
     const arrowPadding = getArrowPadding(cellSize);
 
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     ctx.save();
-    ctx.translate(arrowPadding, arrowPadding);
+    if (frameType != 'text') {
+      ctx.translate(arrowPadding, arrowPadding);
+    }
 
     ctx.strokeStyle = wallColor;
     ctx.lineWidth = wallThickness;
@@ -529,19 +434,28 @@ export const useMazeDrawing = () => {
         drawCircularMaze(ctx, maze, rows, columns, cellSize, wallColor, wallThickness, showArrows);
         break;
       case 'polygon':
-        drawPolygonMaze(ctx, maze, rows, columns, sides, cellSize, wallColor, showArrows);
-        break;
-      case 'text':
-        drawTextMaze(ctx, maze, {
-          rows,
-          columns,
-          cellSize,
+        drawPolygonMaze(ctx, maze, rows, columns, sides, cellSize, {
           wallColor,
           backgroundColor,
           wallThickness,
-          solutionColor,
           showArrows,
-          text
+          solutionColor,
+          solutionPath,
+          perpendicularWalls
+        });
+        break;
+      case 'text':
+        const letterWidth = 15
+        const letterHeight = letterWidth * 2
+        const effectiveRows = letterHeight * 1.2
+        const effectiveColumns = letterWidth * text.length * 1.2
+        drawTextMaze(ctx, maze, {
+          effectiveRows,
+          effectiveColumns,
+          cellSize,
+          solutionColor,
+          wallColor,
+          showArrows
         });
         break;
       default:
@@ -620,6 +534,81 @@ export const useMazeDrawing = () => {
               y = centerY + radius * Math.sin(angle);
               ctx.lineTo(x, y);
             }
+            ctx.stroke();
+          }
+        } 
+        else if (frameType === 'polygon') {
+          const centerX = ctx.canvas.width / 2;
+          const centerY = ctx.canvas.height / 2;
+          const rings = maze.length;
+          const maxRadius = Math.min(centerX, centerY) * 0.8;
+          const ringWidth = maxRadius / (rings + 1);
+          const totalCells = maze[0]?.length || 0;
+          const baseLineWidth = ringWidth / 3;
+
+          ctx.strokeStyle = solutionColor;
+          ctx.lineCap = 'round';
+          ctx.lineJoin = 'round';
+
+          const getPointOnRing = (radius: number, progress: number, isRadial: boolean = false): [number, number] => {
+            const sideProgress = progress * sides;
+            const currentSide = Math.floor(sideProgress);
+            const progressInSide = sideProgress - currentSide;
+            const angleOffset = isRadial ? Math.PI / (sides * 8) : 0;
+            const startAngle = (currentSide * 2 * Math.PI / sides) - (Math.PI / 2) + angleOffset;
+            const endAngle = ((currentSide + 1) * 2 * Math.PI / sides) - (Math.PI / 2) + angleOffset;
+            const startX = centerX + radius * Math.cos(startAngle);
+            const startY = centerY + radius * Math.sin(startAngle);
+            const endX = centerX + radius * Math.cos(endAngle);
+            const endY = centerY + radius * Math.sin(endAngle);
+            
+            return [
+              startX + (endX - startX) * progressInSide,
+              startY + (endY - startY) * progressInSide
+            ];
+          };
+          
+
+          for (let i = 1; i < solutionPath.length; i++) {
+            const prev = solutionPath[i - 1];
+            const current = solutionPath[i];
+
+            ctx.beginPath();
+
+            if (prev.row === current.row) {
+              const currentRadius = (current.row + 2) * ringWidth - ringWidth / 2;
+              const prevProgress = (prev.col + 0.5) / totalCells;
+              const currentProgress = (current.col + 0.5) / totalCells;
+
+              const circumferenceRatio = currentRadius / maxRadius;
+              ctx.lineWidth = Math.max(1, baseLineWidth * circumferenceRatio);
+
+              const steps = 10;
+              const progressDelta = (currentProgress - prevProgress) / steps;
+
+              const [startX, startY] = getPointOnRing(currentRadius, prevProgress);
+              ctx.moveTo(startX, startY);
+
+              for (let step = 1; step <= steps; step++) {
+                const progress = prevProgress + progressDelta * step;
+                const [x, y] = getPointOnRing(currentRadius, progress);
+                ctx.lineTo(x, y);
+              }
+            } else {
+              // For radial movement, stop at inner edge of next ring
+              const currentRadius = (current.row + 2) * ringWidth - ringWidth / 1.8;
+              const prevRadius = (prev.row + 2) * ringWidth - ringWidth / 1.8;
+              const progress = current.col / totalCells;
+              const [startX, startY] = getPointOnRing(prevRadius, progress, true);
+              const [endX, endY] = getPointOnRing(currentRadius, progress, true);
+
+              const circumferenceRatio = currentRadius / maxRadius;
+              ctx.lineWidth = Math.max(1, baseLineWidth * circumferenceRatio);
+
+              ctx.moveTo(startX, startY);
+              ctx.lineTo(endX, endY);
+            }
+
             ctx.stroke();
           }
         } else {

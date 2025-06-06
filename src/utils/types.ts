@@ -16,10 +16,10 @@ export interface Cell {
   radialWall?: boolean;
 }
 
-export type Wall = { 
-  x: number; 
-  y: number; 
-  isHorizontal: boolean 
+export type Wall = {
+  x: number;
+  y: number;
+  isHorizontal: boolean
 };
 
 export interface MazeSettings {
@@ -28,7 +28,7 @@ export interface MazeSettings {
   deadEndDensity: number;
   multipleExits: boolean;
   entrancePosition: 'north' | 'south' | 'east' | 'west' | 'random';
-  exitPosition: 'north' | 'south' | 'east' | 'west' | 'random' | 'farthest';
+  exitPosition: 'north' | 'south' | 'east' | 'west' | 'random';
   symmetry: 'none' | 'horizontal' | 'vertical' | 'both';
 }
 
@@ -45,6 +45,9 @@ export interface AppearanceSettings {
   text: string;
   letterDistance: number;
   letterSize: number;
+  perpendicularWalls: boolean;
+  upperLetterConnector: boolean;
+  lowerLetterConnector: boolean;
 }
 
 export interface SolverSettings {
@@ -61,6 +64,8 @@ export interface SolvingState {
   exitCell?: Position;
 }
 
-export type MazeAlgorithm = 'binary' | 'sidewinder' | 'recursive-backtracker' | 'prims' | 'recursive-division' | 'hunt-and-kill';
+export type MazeAlgorithm = 'binary' | 'sidewinder' | 'recursive-backtracker' | 'prims' | 'recursive-division' | 'hunt-and-kill' | 'eller' | 'kruskal' | 'wilson' | 'aldous-broder';
 
 export type FrameType = 'square' | 'polygon' | 'circular' | 'text';
+
+export type ArrowDirection = 'up' | 'down' | 'left' | 'right';

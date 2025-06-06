@@ -1,0 +1,11 @@
+shape:
+ - heart
+ - circle -> ellipse
+ - star
+ - infinite
+
+- hexagonal cells
+- image in the middle
+
+ https://www.dreamstime.com/labyrinth-game-maze-conundrum-way-rebus-many-entrance-riddle-vector-puzzle-exit-search-shape-square-illustration-image317137197
+ https://www.dreamstime.com/stock-illustration-four-maze-games-answers-simple-mazes-various-shapes-included-image41152152
