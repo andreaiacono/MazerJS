@@ -5,6 +5,7 @@ export interface CheckboxProps {
   label: string;
   checked: boolean;
   onChange: (checked: boolean) => void;
+  disabled: boolean;
   className?: string;
 }
 
@@ -12,6 +13,7 @@ export const Checkbox: React.FC<CheckboxProps> = ({
   label,
   checked,
   onChange,
+  disabled,
   className = "",
 }: CheckboxProps) => {
   return (
@@ -22,6 +24,7 @@ export const Checkbox: React.FC<CheckboxProps> = ({
       )}
     >
       <input
+        disabled={disabled}
         type="checkbox"
         checked={checked}
         onChange={(e) => onChange(e.target.checked)}

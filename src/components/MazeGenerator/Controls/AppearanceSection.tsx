@@ -6,7 +6,6 @@ import { AccordionItem, AccordionTrigger, AccordionContent } from '../../ui/acco
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select';
 import { FrameType, AppearanceSettings } from '../../../utils/types';
 import { useMazeContext } from '../../../contexts/MazeContext';
-import { start } from 'repl';
 
 interface AppearanceSectionProps {
   frameType: FrameType;
@@ -23,40 +22,50 @@ export const AppearanceSection: React.FC<AppearanceSectionProps> = ({
 }) => {
   const { generateMaze } = useMazeContext();
 
-  const handleFrameTypeChange = (newType: FrameType) => {
-    setFrameType(newType);
-    sliderConfigs[newType]?.forEach((config) => {
-      onSettingChange(config.key as keyof AppearanceSettings, config.start);
-    });
-    generateMaze();
-  };
-
   const sliderConfigs = {
     square: [
-      { key: 'rows', label: "Rows", value: settings.rows, min: 2, max: 200, start: 10 },
-      { key: 'columns', label: "Columns", value: settings.columns, min: 4, max: 200, start: 10 },
-      { key: 'cellSize', label: "Maze Size", value: settings.cellSize, min: 2, max: 80, start: 20 },
-      { key: 'wallThickness', label: "Wall thickness", value: settings.wallThickness, min: 1, max: 10, start: 2 },
+      { key: 'rows', label: "Rows", value: settings.rows, min: 2, max: 200, start: 10, step: 1 },
+      { key: 'columns', label: "Columns", value: settings.columns, min: 4, max: 200, start: 10, step: 1 },
+      { key: 'wallThickness', label: "Wall thickness", value: settings.wallThickness, min: 1, max: 10, start: 2, step: 1 },
+      { key: 'cellSize', label: "Zoom", value: settings.cellSize, min: 2, max: 80, start: 20, step: 1 },
     ],
     circular: [
-      { key: 'rows', label: "Rings", value: settings.rows, min: 4, max: 100, start: 10 },
-      { key: 'columns', label: "Sectors", value: settings.columns, min: 4, max: 100, start: 10 },
-      { key: 'cellSize', label: "Maze Size", value: settings.cellSize, min: 2, max: 80, start: 10 },
-      { key: 'wallThickness', label: "Wall thickness", value: settings.wallThickness, min: 1, max: 10, start: 2 },
+      { key: 'rows', label: "Rings", value: settings.rows, min: 4, max: 100, start: 30, step: 1 },
+      { key: 'columns', label: "Sectors", value: settings.columns, min: 4, max: 100, start: 30, step: 1 },
+      { key: 'wallThickness', label: "Wall thickness", value: settings.wallThickness, min: 1, max: 10, start: 2, step: 1 },
+      { key: 'cellSize', label: "Zoom", value: settings.cellSize, min: 2, max: 80, start: 20, step: 1 },
     ],
     polygon: [
       { key: 'polygonSides', label: "Number of Sides", value: settings.polygonSides, min: 3, max: 20, step: 1, start: 5 },
-      { key: 'rows', label: "Rows", value: settings.rows, min: 4, max: 100, start: 10 },
-      { key: 'columns', label: "Columns", value: settings.columns, min: 4, max: 200, start: 10 },
-      { key: 'cellSize', label: "Maze Size", value: settings.cellSize, min: 2, max: 80, start: 20 },
-      { key: 'wallThickness', label: "Wall thickness", value: settings.wallThickness, min: 1, max: 10, start: 2 },
+      { key: 'rows', label: "Rings", value: settings.rows, min: 4, max: 100, start: 20, step: 1 },
+      { key: 'columns', label: "Sectors", value: settings.columns, min: 5, max: 200, start: 40, step: settings.polygonSides },
+      { key: 'wallThickness', label: "Wall thickness", value: settings.wallThickness, min: 1, max: 10, start: 2, step: 1 },
+      { key: 'cellSize', label: "Zoom", value: settings.cellSize, min: 2, max: 80, start: 20, step: 1 },
     ],
     text: [
-      { key: 'letterSize', label: "Letter Size", value: settings.letterSize, min: 5, max: 20, start: 10 },
-      { key: 'letterDistance', label: "Letter Distance", value: settings.letterDistance, min: 1, max: 20, start: 10 },
-      { key: 'cellSize', label: "Maze Size", value: settings.cellSize, min: 2, max: 80, start: 20 },
-      { key: 'wallThickness', label: "Wall thickness", value: settings.wallThickness, min: 1, max: 10, start: 2 },
+      { key: 'letterSize', label: "Letter Size", value: settings.letterSize, min: 15, max: 40, start: 20, step: 1 },
+      { key: 'letterDistance', label: "Letter Distance", value: settings.letterDistance, min: -18, max: 10, start: 0, step: 1 },
+      { key: 'wallThickness', label: "Wall thickness", value: settings.wallThickness, min: 1, max: 10, start: 2, step: 1 },
+      { key: 'cellSize', label: "Zoom", value: settings.cellSize, min: 2, max: 50, start: 10, step: 1 },
     ]
+  };
+
+  const handleFrameTypeChange = (newType: FrameType) => {
+    // First update the frame type
+    setFrameType(newType);
+
+    // Then update all the settings for the new frame type with their default values
+    if (sliderConfigs[newType]) {
+      const updates = sliderConfigs[newType].reduce((acc, config) => {
+        acc[config.key] = config.start;
+        return acc;
+      }, {} as Partial<AppearanceSettings>);
+
+      // Apply all settings updates at once
+      Object.entries(updates).forEach(([key, value]) => {
+        onSettingChange(key as keyof AppearanceSettings, value);
+      });
+    }
   };
 
   return (
@@ -87,7 +96,7 @@ export const AppearanceSection: React.FC<AppearanceSectionProps> = ({
               <Input
                 type="text"
                 value={settings.text}
-                onChange={(e) => onSettingChange('text', e.target.value.toUpperCase())}
+                onChange={(e) => onSettingChange('text', e.target.value)}
                 className="w-full px-3 py-2 border rounded-md"
                 maxLength={10}
               />
@@ -104,17 +113,51 @@ export const AppearanceSection: React.FC<AppearanceSectionProps> = ({
               }}
               min={config.min ?? 5}
               max={config.max ?? 80}
-              step={1}
+              step={config.step ?? 1}
             />
           ))}
 
+          {frameType === 'polygon' && (
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                disabled={true}
+                checked={false}
+                label="Perpendicular Walls"
+                onChange={(checked: boolean) => onSettingChange('perpendicularWalls', checked)}
+              />
+            </div>
+          )}
+
+          {frameType === 'text' && (
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                disabled={false}
+                checked={settings.upperLetterConnector}
+                label="Upper Letter Connector"
+                onChange={(checked: boolean) => onSettingChange('upperLetterConnector', checked)}
+              />
+            </div>
+          )}
+          {frameType === 'text' && (
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                disabled={false}
+                checked={settings.lowerLetterConnector}
+                label="Lower Letter Connector"
+                onChange={(checked: boolean) => onSettingChange('lowerLetterConnector', checked)}
+              />
+            </div>
+          )}
+
           <div className="flex items-center space-x-2">
             <Checkbox
+              disabled={false}
               checked={settings.showArrows}
               label="Show Entrance/Exit Arrows"
               onChange={(checked: boolean) => onSettingChange('showArrows', checked)}
             />
           </div>
+
 
           <div className="flex gap-4 items-center">
             <div className="flex-1">

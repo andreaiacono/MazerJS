@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { MazeContext } from './MazeContext';
 import {
   Cell,
@@ -17,7 +17,6 @@ export const MazeProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [maze, setMaze] = useState<Cell[][]>([]);
   const [frameType, setFrameType] = useState<FrameType>('square');
   const [algorithm, setAlgorithm] = useState<MazeAlgorithm>('recursive-backtracker');
-  const [letterCells, setLetterCells] = useState<Set<string>>(new Set());
 
   // Settings states
   const [mazeSettings, setMazeSettings] = useState<MazeSettings>({
@@ -39,9 +38,12 @@ export const MazeProvider: React.FC<{ children: React.ReactNode }> = ({ children
     showArrows: true,
     wallColor: "#000000",
     backgroundColor: "#ffffff",
-    text: "MAZE",
-    letterDistance: 5,
-    letterSize: 5
+    text: "AVAWA",
+    letterDistance: 10, 
+    letterSize: 5,
+    perpendicularWalls: true,
+    upperLetterConnector: false,
+    lowerLetterConnector: false,
   });
 
   const [solverSettings, setSolverSettings] = useState<SolverSettings>({
@@ -58,6 +60,11 @@ export const MazeProvider: React.FC<{ children: React.ReactNode }> = ({ children
     frameType as 'square' | 'circular' | 'polygon' | 'text'
   );
 
+  useEffect(() => {
+    // Generate maze whenever algorithm changes
+    generateMaze();
+  }, [algorithm]); // Only dependency should be algorithm
+
   // Add path update handler
   const handlePathUpdate = useCallback((path: Position[]) => {
     setSolutionPath(path);
@@ -73,17 +80,19 @@ export const MazeProvider: React.FC<{ children: React.ReactNode }> = ({ children
     appearanceSettings.text,
     appearanceSettings.polygonSides,
     appearanceSettings.cellSize,
-    setLetterCells
+    appearanceSettings.letterDistance,
+    appearanceSettings.letterSize,
+    appearanceSettings.upperLetterConnector,
+    appearanceSettings.lowerLetterConnector,
   );
 
-  const generateMaze = useCallback(() => {
+   const generateMaze = useCallback(() => {
     abortSolving();
     setSolutionPath([]);
     setSolverSettings(prev => ({ ...prev, isSolving: false }));
-    
     const newMaze = generateMazeFromHook();
     setMaze(newMaze);
-  }, [generateMazeFromHook, abortSolving]);
+  }, [generateMazeFromHook, abortSolving, appearanceSettings]);
 
 
   const showSolution = useCallback(async () => {
@@ -143,8 +152,6 @@ export const MazeProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setAppearanceSettings,
     solverSettings,
     updateSolverSettings,
-    letterCells,
-    setLetterCells,
 
     // Actions
     generateMaze,

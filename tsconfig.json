@@ -31,19 +31,3 @@
   "include": ["src/**/*.ts", "src/**/*.tsx"],
   "exclude": ["node_modules"]
 }
-
-
-
-// {
-//     "target": "es5",
-//     "noFallthroughCasesInSwitch": true,
-//     "moduleResolution": "node",
-//   },
-//   "include": [
-//     "src"
-//   ]
-// }
-
-
-
-
