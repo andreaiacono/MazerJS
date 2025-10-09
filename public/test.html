@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Form</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 600px;
+            width: 100%;
+            padding: 40px;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        
+        .description {
+            color: #666;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        
+        .question {
+            margin-bottom: 30px;
+        }
+        
+        .question-text {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .option {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .option:hover {
+            border-color: #667eea;
+            background-color: #f8f9ff;
+        }
+        
+        .option input[type="radio"] {
+            margin-right: 12px;
+            cursor: pointer;
+            width: 20px;
+            height: 20px;
+        }
+        
+        .option label {
+            cursor: pointer;
+            flex: 1;
+            font-size: 16px;
+            color: #555;
+        }
+        
+        .option.selected {
+            border-color: #667eea;
+            background-color: #f0f3ff;
+        }
+        
+        .submit-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 18px;
+            border-radius: 10px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: 600;
+            transition: transform 0.2s ease;
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .submit-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .result {
+            display: none;
+            text-align: center;
+        }
+        
+        .result.show {
+            display: block;
+        }
+        
+        .result h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+        
+        .result-image {
+            max-width: 100%;
+            border-radius: 15px;
+            margin: 20px 0;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .result-description {
+            color: #666;
+            line-height: 1.8;
+            margin-bottom: 20px;
+            font-size: 16px;
+        }
+        
+        .restart-btn {
+            background: #f0f0f0;
+            color: #333;
+            border: none;
+            padding: 12px 30px;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.3s ease;
+        }
+        
+        .restart-btn:hover {
+            background: #e0e0e0;
+        }
+        
+        .form-section {
+            display: block;
+        }
+        
+        .form-section.hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="form-section" id="formSection">
+            <h1 id="quizTitle">Personality Quiz</h1>
+            <p class="description" id="quizDescription">Answer these questions to discover your result!</p>
+            
+            <form id="quizForm">
+                <div id="questionsContainer"></div>
+                <button type="submit" class="submit-btn" id="submitBtn">See My Result</button>
+            </form>
+        </div>
+        
+        <div class="result" id="resultSection">
+            <h2 id="resultTitle"></h2>
+            <img id="resultImage" class="result-image" src="" alt="Result">
+            <p class="result-description" id="resultDescription"></p>
+            <button class="restart-btn" onclick="restartQuiz()">Take Quiz Again</button>
+        </div>
+    </div>
+
+    <script>
+        // CONFIGURATION - Edit this JSON to customize your quiz
+        const quizData = {
+            title: "What's Your Spirit Animal?",
+            description: "Answer these questions to discover which animal matches your personality!",
+            
+            // Questions with their options
+            // Each option has a "value" that will be used to determine the result
+            questions: [
+                {
+                    text: "How do you prefer to spend your weekend?",
+                    options: [
+                        { text: "Exploring outdoors and hiking", value: "adventurous" },
+                        { text: "Reading a book at home", value: "calm" },
+                        { text: "Socializing with friends", value: "social" },
+                        { text: "Working on creative projects", value: "creative" }
+                    ]
+                },
+                {
+                    text: "What's your approach to challenges?",
+                    options: [
+                        { text: "Face them head-on with courage", value: "adventurous" },
+                        { text: "Think carefully before acting", value: "calm" },
+                        { text: "Ask others for help and collaborate", value: "social" },
+                        { text: "Find unique and innovative solutions", value: "creative" }
+                    ]
+                },
+                {
+                    text: "Which environment makes you happiest?",
+                    options: [
+                        { text: "Mountains and wild landscapes", value: "adventurous" },
+                        { text: "Quiet libraries or gardens", value: "calm" },
+                        { text: "Busy cafes or social gatherings", value: "social" },
+                        { text: "Art studios or maker spaces", value: "creative" }
+                    ]
+                }
+            ],
+            
+            // Results based on the most common "value" selected
+            // The scoring logic counts which value appears most frequently
+            results: {
+                adventurous: {
+                    title: "You're an Eagle! 🦅",
+                    image: "https://images.unsplash.com/photo-1611689342806-0863700ce1e4?w=600&h=400&fit=crop",
+                    description: "Bold, free-spirited, and always seeking new horizons. You thrive on adventure and aren't afraid to soar to new heights!"
+                },
+                calm: {
+                    title: "You're an Owl! 🦉",
+                    image: "https://images.unsplash.com/photo-1582554963413-b94c0c0dc3b1?w=600&h=400&fit=crop",
+                    description: "Wise, thoughtful, and observant. You prefer peace and quiet, and your careful nature helps you make the best decisions."
+                },
+                social: {
+                    title: "You're a Dolphin! 🐬",
+                    image: "https://images.unsplash.com/photo-1570481662006-a3a1374699e8?w=600&h=400&fit=crop",
+                    description: "Friendly, playful, and highly social. You thrive in groups and bring joy and energy to everyone around you!"
+                },
+                creative: {
+                    title: "You're a Fox! 🦊",
+                    image: "https://images.unsplash.com/photo-1474511320723-9a56873867b5?w=600&h=400&fit=crop",
+                    description: "Clever, adaptable, and creative. You approach life with curiosity and always find innovative ways to solve problems."
+                }
+            }
+        };
+
+        // Initialize the quiz
+        function initQuiz() {
+            document.getElementById('quizTitle').textContent = quizData.title;
+            document.getElementById('quizDescription').textContent = quizData.description;
+            
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '';
+            
+            quizData.questions.forEach((question, qIndex) => {
+                const questionDiv = document.createElement('div');
+                questionDiv.className = 'question';
+                
+                const questionText = document.createElement('div');
+                questionText.className = 'question-text';
+                questionText.textContent = `${qIndex + 1}. ${question.text}`;
+                questionDiv.appendChild(questionText);
+                
+                const optionsDiv = document.createElement('div');
+                optionsDiv.className = 'options';
+                
+                question.options.forEach((option, oIndex) => {
+                    const optionDiv = document.createElement('div');
+                    optionDiv.className = 'option';
+                    
+                    const radio = document.createElement('input');
+                    radio.type = 'radio';
+                    radio.name = `question${qIndex}`;
+                    radio.value = option.value;
+                    radio.id = `q${qIndex}o${oIndex}`;
+                    radio.required = true;
+                    
+                    const label = document.createElement('label');
+                    label.htmlFor = `q${qIndex}o${oIndex}`;
+                    label.textContent = option.text;
+                    
+                    optionDiv.appendChild(radio);
+                    optionDiv.appendChild(label);
+                    
+                    // Add click handler for visual feedback
+                    optionDiv.addEventListener('click', function() {
+                        radio.checked = true;
+                        document.querySelectorAll(`input[name="question${qIndex}"]`).forEach(r => {
+                            r.closest('.option').classList.remove('selected');
+                        });
+                        optionDiv.classList.add('selected');
+                    });
+                    
+                    optionsDiv.appendChild(optionDiv);
+                });
+                
+                questionDiv.appendChild(optionsDiv);
+                container.appendChild(questionDiv);
+            });
+        }
+
+        // Calculate result based on most common value
+        function calculateResult(answers) {
+            const counts = {};
+            
+            answers.forEach(answer => {
+                counts[answer] = (counts[answer] || 0) + 1;
+            });
+            
+            let maxCount = 0;
+            let resultKey = '';
+            
+            for (const [key, count] of Object.entries(counts)) {
+                if (count > maxCount) {
+                    maxCount = count;
+                    resultKey = key;
+                }
+            }
+            
+            return quizData.results[resultKey];
+        }
+
+        // Handle form submission
+        document.getElementById('quizForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const answers = [];
+            quizData.questions.forEach((_, index) => {
+                const selected = document.querySelector(`input[name="question${index}"]:checked`);
+                if (selected) {
+                    answers.push(selected.value);
+                }
+            });
+            
+            const result = calculateResult(answers);
+            
+            document.getElementById('resultTitle').textContent = result.title;
+            document.getElementById('resultImage').src = result.image;
+            document.getElementById('resultDescription').textContent = result.description;
+            
+            document.getElementById('formSection').classList.add('hidden');
+            document.getElementById('resultSection').classList.add('show');
+        });
+
+        // Restart quiz
+        function restartQuiz() {
+            document.getElementById('quizForm').reset();
+            document.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
+            document.getElementById('formSection').classList.remove('hidden');
+            document.getElementById('resultSection').classList.remove('show');
+        }
+
+        // Initialize on page load
+        initQuiz();
+    </script>
+</body>
+</html>
