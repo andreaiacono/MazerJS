@@ -1,4 +1,4 @@
-import { Cell } from '../types';
+import { Cell } from '../../types';
 import { createEmptyGrid, getRandomElement } from './utils';
 
 export const wilsonMaze = (rows: number, columns: number): Cell[][] => {

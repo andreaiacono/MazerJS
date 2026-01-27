@@ -5,7 +5,7 @@ import { Accordion } from '../../ui/accordion';
 import { AppearanceSection } from './AppearanceSection';
 import { GenerationSection } from './GenerationSection';
 import { SolvingSection } from './SolvingSection';
-import { MazeSettings, FrameType, MazeAlgorithm, AppearanceSettings, SolverSettings } from '../../../utils/types';
+import { MazeSettings, FrameType, MazeAlgorithm, AppearanceSettings, SolverSettings } from '../../../types';
 
 interface ControlsProps {
   isOpen: boolean;

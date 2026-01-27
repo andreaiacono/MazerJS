@@ -2,8 +2,8 @@ import React from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select';
 import { NumberSlider } from '../../ui/number-slider';
 import { AccordionItem, AccordionTrigger, AccordionContent } from '../../ui/accordion';
-import { MazeSettings, MazeAlgorithm } from '../../../utils/types';
-import { getAlgorithmDescription } from '../../../utils/constants';
+import { MazeSettings, MazeAlgorithm } from '../../../types';
+import { getAlgorithmDescription } from '../../../constants';
 import { useMazeContext } from '../../../contexts/MazeContext';
 
 interface GenerationSectionProps {

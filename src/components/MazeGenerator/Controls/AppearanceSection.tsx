@@ -4,25 +4,26 @@ import { Checkbox } from '../../ui/checkbox';
 import { NumberSlider } from '../../ui/number-slider';
 import { AccordionItem, AccordionTrigger, AccordionContent } from '../../ui/accordion';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select';
-import { FrameType, AppearanceSettings } from '../../../utils/types';
+import { FrameType, AppearanceSettings } from '../../../types';
 import { useMazeContext } from '../../../contexts/MazeContext';
 
-interface AppearanceSectionProps {
-  frameType: FrameType;
-  setFrameType: (type: FrameType) => void;
-  settings: AppearanceSettings;
-  onSettingChange: (setting: keyof AppearanceSettings, value: any) => void;
-}
+export const AppearanceSection: React.FC = () => {
+  const {
+    frameType,
+    setFrameType,
+    appearanceSettings: settings,
+    setAppearanceSettings: onSettingChange
+  } = useMazeContext();
 
-export const AppearanceSection: React.FC<AppearanceSectionProps> = ({
-  frameType,
-  setFrameType,
-  settings,
-  onSettingChange,
-}) => {
-  const { generateMaze } = useMazeContext();
-
-  const sliderConfigs = {
+  const sliderConfigs: Record<FrameType, Array<{
+    key: keyof AppearanceSettings;
+    label: string;
+    value: number | string | boolean;
+    min: number;
+    max: number;
+    start: number;
+    step: number;
+  }>> = {
     square: [
       { key: 'rows', label: "Rows", value: settings.rows, min: 2, max: 200, start: 10, step: 1 },
       { key: 'columns', label: "Columns", value: settings.columns, min: 4, max: 200, start: 10, step: 1 },
@@ -43,28 +44,23 @@ export const AppearanceSection: React.FC<AppearanceSectionProps> = ({
       { key: 'cellSize', label: "Zoom", value: settings.cellSize, min: 2, max: 80, start: 20, step: 1 },
     ],
     text: [
-      { key: 'letterSize', label: "Letter Size", value: settings.letterSize, min: 15, max: 40, start: 20, step: 1 },
-      { key: 'letterDistance', label: "Letter Distance", value: settings.letterDistance, min: -18, max: 10, start: 0, step: 1 },
+      { key: 'letterSize', label: "Letter Size", value: settings.letterSize as number, min: 15, max: 40, start: 20, step: 1 },
+      { key: 'letterDistance', label: "Letter Distance", value: settings.letterDistance as number, min: -18, max: 10, start: 0, step: 1 },
       { key: 'wallThickness', label: "Wall thickness", value: settings.wallThickness, min: 1, max: 10, start: 2, step: 1 },
       { key: 'cellSize', label: "Zoom", value: settings.cellSize, min: 2, max: 50, start: 10, step: 1 },
     ]
   };
 
   const handleFrameTypeChange = (newType: FrameType) => {
-    // First update the frame type
     setFrameType(newType);
 
-    // Then update all the settings for the new frame type with their default values
     if (sliderConfigs[newType]) {
       const updates = sliderConfigs[newType].reduce((acc, config) => {
-        acc[config.key] = config.start;
+        acc[config.key] = config.start as any;
         return acc;
       }, {} as Partial<AppearanceSettings>);
 
-      // Apply all settings updates at once
-      Object.entries(updates).forEach(([key, value]) => {
-        onSettingChange(key as keyof AppearanceSettings, value);
-      });
+      onSettingChange(updates);
     }
   };
 
@@ -77,7 +73,7 @@ export const AppearanceSection: React.FC<AppearanceSectionProps> = ({
         <div className="pt-4 space-y-4">
           <div>
             <label className="block mb-2 font-medium">Frame Type</label>
-            <Select value={frameType} onValueChange={handleFrameTypeChange}>
+            <Select value={frameType} onValueChange={(val) => handleFrameTypeChange(val as FrameType)}>
               <SelectTrigger>
                 <SelectValue placeholder="Select frame type" />
               </SelectTrigger>
@@ -96,7 +92,7 @@ export const AppearanceSection: React.FC<AppearanceSectionProps> = ({
               <Input
                 type="text"
                 value={settings.text}
-                onChange={(e) => onSettingChange('text', e.target.value)}
+                onChange={(e) => onSettingChange({ text: e.target.value })}
                 className="w-full px-3 py-2 border rounded-md"
                 maxLength={10}
               />
@@ -107,57 +103,50 @@ export const AppearanceSection: React.FC<AppearanceSectionProps> = ({
             <NumberSlider
               key={config.key}
               label={config.label}
-              value={config.value}
-              onChange={(value) => {
-                onSettingChange(config.key as keyof AppearanceSettings, value);
-              }}
-              min={config.min ?? 5}
-              max={config.max ?? 80}
-              step={config.step ?? 1}
+              value={config.value as number}
+              onChange={(value) => onSettingChange({ [config.key]: value })}
+              min={config.min}
+              max={config.max}
+              step={config.step}
             />
           ))}
 
           {frameType === 'polygon' && (
             <div className="flex items-center space-x-2">
               <Checkbox
-                disabled={true}
-                checked={false}
+                checked={settings.perpendicularWalls}
                 label="Perpendicular Walls"
-                onChange={(checked: boolean) => onSettingChange('perpendicularWalls', checked)}
+                onChange={(checked: boolean) => onSettingChange({ perpendicularWalls: checked })}
               />
             </div>
           )}
 
           {frameType === 'text' && (
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                disabled={false}
-                checked={settings.upperLetterConnector}
-                label="Upper Letter Connector"
-                onChange={(checked: boolean) => onSettingChange('upperLetterConnector', checked)}
-              />
-            </div>
-          )}
-          {frameType === 'text' && (
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                disabled={false}
-                checked={settings.lowerLetterConnector}
-                label="Lower Letter Connector"
-                onChange={(checked: boolean) => onSettingChange('lowerLetterConnector', checked)}
-              />
-            </div>
+            <>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  checked={settings.upperLetterConnector}
+                  label="Upper Letter Connector"
+                  onChange={(checked: boolean) => onSettingChange({ upperLetterConnector: checked })}
+                />
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  checked={settings.lowerLetterConnector}
+                  label="Lower Letter Connector"
+                  onChange={(checked: boolean) => onSettingChange({ lowerLetterConnector: checked })}
+                />
+              </div>
+            </>
           )}
 
           <div className="flex items-center space-x-2">
             <Checkbox
-              disabled={false}
               checked={settings.showArrows}
               label="Show Entrance/Exit Arrows"
-              onChange={(checked: boolean) => onSettingChange('showArrows', checked)}
+              onChange={(checked: boolean) => onSettingChange({ showArrows: checked })}
             />
           </div>
-
 
           <div className="flex gap-4 items-center">
             <div className="flex-1">
@@ -165,7 +154,7 @@ export const AppearanceSection: React.FC<AppearanceSectionProps> = ({
               <Input
                 type="color"
                 value={settings.wallColor}
-                onChange={(e) => onSettingChange('wallColor', e.target.value)}
+                onChange={(e) => onSettingChange({ wallColor: e.target.value })}
                 className="h-10 w-full"
               />
             </div>
@@ -174,7 +163,7 @@ export const AppearanceSection: React.FC<AppearanceSectionProps> = ({
               <Input
                 type="color"
                 value={settings.backgroundColor}
-                onChange={(e) => onSettingChange('backgroundColor', e.target.value)}
+                onChange={(e) => onSettingChange({ backgroundColor: e.target.value })}
                 className="h-10 w-full"
               />
             </div>

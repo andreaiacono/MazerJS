@@ -1,4 +1,4 @@
-import { Cell, Position, MazeSettings } from '../types';
+import { Cell, Position, MazeSettings } from '../../types';
 
 export const createEmptyGrid = (rows: number, columns: number, createWalls: boolean = true): Cell[][] => {
   return Array(rows).fill(null).map(() => 

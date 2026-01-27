@@ -1,4 +1,4 @@
-import { Position, Cell } from '../types';
+import { Position, Cell } from '../../types';
 
 type WallType = 'northWall' | 'southWall' | 'eastWall' | 'westWall';
 

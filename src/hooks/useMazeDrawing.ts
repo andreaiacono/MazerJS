@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
-import { Cell, FrameType, Position } from '../utils/types';
-import { drawArrow, drawLine, getArrowPadding, drawArrowShape } from '../utils/helpers/drawing';
+import { Cell, FrameType, Position } from '../types';
+import { drawArrow, drawLine, getArrowPadding, drawArrowShape } from '../lib/helpers/drawing';
 
 export const useMazeDrawing = () => {
 
@@ -24,15 +24,26 @@ export const useMazeDrawing = () => {
     }
   ) => {
 
-    const drawSquareMaze = (ctx: CanvasRenderingContext2D,
-      maze: Cell[][],
-      rows: number,
-      columns: number,
-      cellSize: number,
-      solutionColor: string,
-      arrowColor: string,
-      showArrows: boolean) => {
+    const {
+      columns,
+      sides,
+      cellSize,
+      wallColor,
+      backgroundColor,
+      wallThickness,
+      showArrows,
+      solutionColor,
+      solutionPath,
+      perpendicularWalls
+    } = options;
 
+    const drawSquareMaze = (
+      ctx: CanvasRenderingContext2D,
+      maze: Cell[][],
+      cellSize: number,
+      arrowColor: string,
+      showArrows: boolean
+    ) => {
       for (let row = 0; row < maze.length; row++) {
         if (!maze[row]) continue;
 
@@ -48,8 +59,6 @@ export const useMazeDrawing = () => {
 
           // Draw entrance/exit arrows if enabled
           if (showArrows) {
-            const mazeWidth = columns * cellSize;
-            const arrowLength = cellSize * 1.2;
             if (cell.isEntrance) {
                 drawArrow(ctx, row, col, cellSize, true, arrowColor, maze.length, maze[row].length);
             }
@@ -64,21 +73,14 @@ export const useMazeDrawing = () => {
     const drawPolygonMaze = (
       ctx: CanvasRenderingContext2D,
       maze: Cell[][],
-      rows: number,
-      columns: number,
       sides: number,
-      cellSize: number,
       options: {
         wallColor: string;
-        backgroundColor: string;
         wallThickness: number;
-        showArrows: boolean;
-        solutionColor: string;
-        solutionPath?: Position[];
-        perpendicularWalls?: boolean;
+        perpendicularWalls: boolean;
       }
     ) => {
-      const { wallColor, wallThickness, showArrows, perpendicularWalls = false } = options;
+      const { wallColor, wallThickness, perpendicularWalls } = options;
 
       ctx.strokeStyle = wallColor;
       ctx.lineWidth = wallThickness;
@@ -138,8 +140,6 @@ export const useMazeDrawing = () => {
 
           const outerStart = getPointOnRing(currentRadius, cellProgress);
           const outerEnd = getPointOnRing(currentRadius, nextCellProgress);
-          const innerStart = getPointOnRing(currentRadius - ringWidth, cellProgress);
-          const innerEnd = getPointOnRing(currentRadius - ringWidth, nextCellProgress);
 
           // Draw circumferential wall (along the ring)
           if (currentCell.southWall) {
@@ -157,14 +157,11 @@ export const useMazeDrawing = () => {
 
           const cellProgress = cell / totalCells;
           const nextCellProgress = (cell + 1) / totalCells;
-
           const outerStart = getPointOnRing(currentRadius, cellProgress);
           const outerEnd = getPointOnRing(currentRadius, nextCellProgress);
-          const innerStart = getPointOnRing(currentRadius - ringWidth, cellProgress);
           const innerEnd = getPointOnRing(currentRadius - ringWidth, nextCellProgress);
 
-          // if (perpendicularWalls) {          
-          if (false) {
+          if (perpendicularWalls) {
             // Calculate tangent vector along the ring wall
             const dirX = outerEnd[0] - outerStart[0];
             const dirY = outerEnd[1] - outerStart[1];
@@ -183,7 +180,6 @@ export const useMazeDrawing = () => {
             ctx.lineTo(intersectX, intersectY);
             ctx.stroke();
           } else {
-            // Original radial walls
             ctx.beginPath();
             ctx.moveTo(...outerEnd);
             ctx.lineTo(...innerEnd);
@@ -191,52 +187,11 @@ export const useMazeDrawing = () => {
           }
         }
       }
-
-      // Draw entrance/exit arrows if enabled
-      // if (showArrows) {
-      //   const arrowLength = ringWidth * 0.8;
-      //   const entranceRadius = (rings + 1) * ringWidth;
-      //   const exitRadius = ringWidth;
-
-      //   for (let cell = 0; cell < totalCells; cell++) {
-      //     const progress = (cell + 0.5) / totalCells;
-
-      //     if (maze[rings - 1][cell]?.isEntrance) {
-      //       const [x, y] = getPointOnRing(entranceRadius, progress);
-      //       const [baseX, baseY] = getPointOnRing(entranceRadius - ringWidth, progress);
-
-      //       drawArrow(
-      //         ctx,
-      //         x,
-      //         y,
-      //         baseX,
-      //         baseY,
-      //         wallColor
-      //       );
-      //     }
-
-      //     if (maze[0][cell]?.isExit) {
-      //       const [baseX, baseY] = getPointOnRing(exitRadius, progress);
-      //       const angle = Math.atan2(baseY - centerY, baseX - centerX);
-
-      //       drawArrow(
-      //         ctx,
-      //         baseX,
-      //         baseY,
-      //         baseX - arrowLength * Math.cos(angle),
-      //         baseY - arrowLength * Math.sin(angle),
-      //         wallColor
-      //       );
-      //     }
-      //   }
-      // }
     };
 
     const drawCircularMaze = (
       ctx: CanvasRenderingContext2D,
       maze: Cell[][],
-      rows: number,
-      columns: number,
       cellSize: number,
       wallColor: string,
       wallThickness: number,
@@ -337,7 +292,6 @@ export const useMazeDrawing = () => {
             const angle = ((sector + 0.5) * 2 * Math.PI) / sectors;
 
             if (cell.isEntrance) {
-              // drawArrow(ctx, 0, sector, cellSize, false, wallColor, rows, columns, 'right');
               const points = {
                 fromY: centerY + (outerRadius + arrowLength) * Math.sin(angle),
                 toY: centerY + outerRadius * Math.sin(angle) + cellSize/2,
@@ -374,18 +328,15 @@ export const useMazeDrawing = () => {
       ctx: CanvasRenderingContext2D,
       maze: Cell[][],
       options: {
-        effectiveRows: number;
-        effectiveColumns: number;
         cellSize: number;
-        solutionColor: string;
         wallColor: string;
         showArrows: boolean;
-      }) => {     const { effectiveRows, effectiveColumns, cellSize, solutionColor, showArrows } = options;
+      }) => {
+      const { cellSize, wallColor, showArrows } = options;
     
       if (maze == null) {
         return;
       }
-      // console.log("rows", rows, "coils", columns, "maze", maze)
       // Draw only the walls for cells that are part of the text
       for (let row = 0; row < maze.length; row++) {
         if (!maze[row]) continue;
@@ -405,23 +356,21 @@ export const useMazeDrawing = () => {
           // Draw entrance/exit arrows if enabled
           if (showArrows) {
             if (cell.isEntrance) {
-              drawArrow(ctx, row, col-2, cellSize, true, wallColor, rows, columns, 'left');
+              drawArrow(ctx, row, col-2, cellSize, true, wallColor, maze.length, maze[row].length, 'left');
             }
             if (cell.isExit) {
-              drawArrow(ctx, row, col+2, cellSize, false, wallColor, rows, columns, 'right');
+              drawArrow(ctx, row, col+2, cellSize, false, wallColor, maze.length, maze[row].length, 'right');
             }
           }
         }
       }
     };
 
-    const { rows, columns, sides, cellSize, wallColor, backgroundColor,
-      wallThickness, showArrows, solutionColor, solutionPath, text, perpendicularWalls } = options;
     const arrowPadding = getArrowPadding(cellSize);
 
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     ctx.save();
-    if (frameType != 'text') {
+    if (frameType !== 'text') {
       ctx.translate(arrowPadding, arrowPadding);
     }
 
@@ -431,35 +380,24 @@ export const useMazeDrawing = () => {
 
     switch (frameType) {
       case 'circular':
-        drawCircularMaze(ctx, maze, rows, columns, cellSize, wallColor, wallThickness, showArrows);
+        drawCircularMaze(ctx, maze, cellSize, wallColor, wallThickness, showArrows);
         break;
       case 'polygon':
-        drawPolygonMaze(ctx, maze, rows, columns, sides, cellSize, {
+        drawPolygonMaze(ctx, maze, sides, {
           wallColor,
-          backgroundColor,
           wallThickness,
-          showArrows,
-          solutionColor,
-          solutionPath,
           perpendicularWalls
         });
         break;
       case 'text':
-        const letterWidth = 15
-        const letterHeight = letterWidth * 2
-        const effectiveRows = letterHeight * 1.2
-        const effectiveColumns = letterWidth * text.length * 1.2
         drawTextMaze(ctx, maze, {
-          effectiveRows,
-          effectiveColumns,
           cellSize,
-          solutionColor,
           wallColor,
           showArrows
         });
         break;
       default:
-        drawSquareMaze(ctx, maze, rows, columns, cellSize, solutionColor, wallColor, showArrows);
+        drawSquareMaze(ctx, maze, cellSize, wallColor, showArrows);
     }
 
     // Draw solution path if it exists
@@ -474,7 +412,6 @@ export const useMazeDrawing = () => {
           const centerY = fixedSize / 2;
 
           const rings = maze.length;
-          // const sectors = maze[0].length;
           const maxRadius = Math.min(centerX, centerY) * 0.8;
           const ringWidth = maxRadius / (rings + 1);
 
@@ -636,7 +573,7 @@ export const useMazeDrawing = () => {
     }
 
     ctx.restore();
-  }, []);
+  }, [columns, sides]);
 
   return {
     drawMaze,

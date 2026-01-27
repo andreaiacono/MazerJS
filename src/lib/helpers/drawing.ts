@@ -1,4 +1,4 @@
-import { ArrowDirection } from "../types";
+import { ArrowDirection } from "../../types";
 
 export const getArrowPadding = (cellSize: number) => Math.max(cellSize * 1.7, 50);
 

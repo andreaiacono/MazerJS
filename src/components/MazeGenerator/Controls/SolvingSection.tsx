@@ -2,7 +2,7 @@ import React from 'react';
 import { Input } from '../../ui/input';
 import { NumberSlider } from '../../ui/number-slider';
 import { AccordionItem, AccordionTrigger, AccordionContent } from '../../ui/accordion';
-import { SolverSettings } from '../../../utils/types';
+import { SolverSettings } from '../../../types';
 
 interface SolvingSectionProps {
   settings: SolverSettings;

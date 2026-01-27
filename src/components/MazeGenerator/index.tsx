@@ -3,7 +3,7 @@ import { useMazeContext } from '../../contexts/MazeContext';
 import { Controls } from './Controls';
 import { ActionButtons } from './ActionButtons';
 import { Canvas } from './Canvas';
-import { MazeSettings, AppearanceSettings, SolverSettings } from '../../utils/types';
+import { MazeSettings, AppearanceSettings, SolverSettings } from '../../types';
 
 const MazeGenerator: React.FC = () => {
   const [isOpen, setIsOpen] = useState(true);

@@ -1,4 +1,4 @@
-import { Cell } from "../types";
+import { Cell } from "../../types";
 
 export function mazeToString(maze: Cell[][]): string {
     const rows = maze.length;

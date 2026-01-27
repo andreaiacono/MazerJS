@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { Cell, Position, SolvingState } from '../utils/types';
-import { getValidMoves } from '../utils/helpers/pathfinding';
+import { Cell, Position, SolvingState } from '../types';
+import { getValidMoves } from '../lib/helpers/pathfinding';
 
 export const useMazeSolving = (
   maze: Cell[][],

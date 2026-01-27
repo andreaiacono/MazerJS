@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { Cell, MazeSettings, FrameType, MazeAlgorithm, Position } from '../utils/types';
+import { Cell, MazeSettings, FrameType, MazeAlgorithm, Position } from '../types';
 import {
   binaryMaze,
   sidewinderMaze,
@@ -11,36 +11,8 @@ import {
   wilsonMaze,
   aldousBroderMaze,
   kruskalMaze
-} from '../utils/mazeAlgorithms';
-import { isPointInPolygon, getPolygonPoints } from '../utils/helpers/geometryHelpers';
-import { getMazeDimensions, mazeToString } from '../utils/helpers/misc';
-import { createEmptyGrid } from '../utils/mazeAlgorithms/utils';
-
-// Maps algorithm names to their implementation functions
-const algorithmMap = {
-  'binary': binaryMaze,
-  'sidewinder': sidewinderMaze,
-  'recursive-backtracker': recursiveBacktracker,
-  'prims': primsAlgorithm,
-  'recursive-division': recursiveDivision,
-  'hunt-and-kill': huntAndKill,
-  'eller': ellerMaze,
-  'wilson': wilsonMaze,
-  'kruskal': kruskalMaze,
-  'aldous-broder': aldousBroderMaze
-} as const;
-
-// Factory for creating empty cells
-const createEmptyCell = (isValid: boolean = true): Cell => ({
-  northWall: isValid,
-  southWall: isValid,
-  eastWall: isValid,
-  westWall: isValid,
-  visited: !isValid,
-  isEntrance: false,
-  isExit: false,
-  isSolution: false
-});
+} from '../lib/algorithms';
+import { getMazeDimensions } from '../lib/helpers/misc';
 
 
 export const useMazeGeneration = (
@@ -144,9 +116,9 @@ export const useMazeGeneration = (
 
       // Apply frame-specific adjustments
       if (frameType === 'circular') {
-        maze = adjustMazeToCircular(maze, rows, columns, cellSize, mazeSettings);
+        maze = adjustMazeToCircular(maze, rows, columns);
       } else if (frameType === 'polygon') {
-        maze = adjustMazeToPolygon(maze, rows, columns, polygonSides, cellSize, mazeSettings);
+        maze = adjustMazeToPolygon(maze, rows, columns, polygonSides, mazeSettings);
         maze = addEntranceAndExit(maze, effectiveRows, effectiveColumns, frameType, mazeSettings);
       } else if (frameType === 'text') {
         maze = adjustMazeToText(maze, text, effectiveRows, effectiveColumns, cellSize, letterDistance, letterSize, upperLetterConnector, lowerLetterConnector);
@@ -183,7 +155,6 @@ export const generateTextValidCells = (
   upperLetterConnector: boolean,
   lowerLetterConnector: boolean,
 ): boolean[][] => {
-  // letterDistance = MAX_LETTER_DISTANCE - letterDistance - 4
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d');
   if (!ctx) return Array(rows).fill([]).map(() => Array(columns).fill(false));
@@ -214,7 +185,6 @@ export const generateTextValidCells = (
 
     if (i < text.length - 1) {
       const currentLetter = letter;
-      const nextLetter = text[i + 1];
       if (upperLetterConnector) {
         const xOffset = ['A', 'D', 'O'].includes(currentLetter) ? 0.5 : 0.8;
         ctx.fillRect(
@@ -326,15 +296,15 @@ export const adjustMazeToText = (
 
       // Copy the cell from the original maze
       adjustedMaze[row][col] = {
-        ...maze[row][col],
-      };
-      adjustedMaze[row][col] = {
         // Add walls at text boundaries
-        northWall: !validCells[row - 1][col] ? true : maze[row][col].northWall,
-        southWall: !validCells[row + 1][col] ? true : maze[row][col].southWall,
-        eastWall: !validCells[row][col + 1] ? true : maze[row][col].eastWall,
-        westWall: !validCells[row][col - 1] ? true : maze[row][col].westWall,
-        visited: true
+        northWall: !validCells[row - 1]?.[col] ? true : maze[row][col].northWall,
+        southWall: !validCells[row + 1]?.[col] ? true : maze[row][col].southWall,
+        eastWall: !validCells[row]?.[col + 1] ? true : maze[row][col].eastWall,
+        westWall: !validCells[row]?.[col - 1] ? true : maze[row][col].westWall,
+        visited: true,
+        isEntrance: false,
+        isExit: false,
+        isSolution: false
       };
 
 
@@ -357,9 +327,7 @@ export const adjustMazeToText = (
 const adjustMazeToCircular = (
   rectangularMaze: Cell[][],
   rows: number,
-  columns: number,
-  cellSize: number,
-  settings: MazeSettings
+  columns: number
 ): Cell[][] => {
   const rings = Math.max(2, Math.floor(rows / 2)) - 1;
   const sectors = Math.max(4, columns);
@@ -431,7 +399,6 @@ const adjustMazeToPolygon = (
   rows: number,
   columns: number,
   sides: number,
-  cellSize: number,
   settings: MazeSettings
 ): Cell[][] => {
   const rings = Math.max(2, Math.floor(rows / 2));
@@ -461,7 +428,6 @@ const adjustMazeToPolygon = (
       const polyCell = polygonMaze[ring][sector];
 
       // Calculate position within the polygon structure
-      const currentSide = Math.floor(sector / sectorsPerSide);
       const positionInSide = sector % sectorsPerSide;
 
       // Copy most walls directly
@@ -739,7 +705,7 @@ const addEntranceAndExit = (maze: Cell[][], rows: number, columns: number, frame
   const newMaze = JSON.parse(JSON.stringify(maze));
 
   // Special handling for circular maze
-  if (frameType === 'circular' || frameType == 'polygon') {
+  if (frameType === 'circular' || frameType === 'polygon') {
     const rings = Math.floor(rows / 2);
     const sectors = columns;
 
@@ -839,5 +805,3 @@ const applySymmetry = (maze: Cell[][], rows: number, columns: number, symmetry: 
 
   return newMaze;
 };
-
-
