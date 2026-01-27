@@ -25,7 +25,6 @@ export const useMazeDrawing = () => {
   ) => {
 
     const {
-      rows,
       columns,
       sides,
       cellSize,
@@ -35,7 +34,7 @@ export const useMazeDrawing = () => {
       showArrows,
       solutionColor,
       solutionPath,
-      text
+      perpendicularWalls
     } = options;
 
     const drawSquareMaze = (
@@ -78,9 +77,10 @@ export const useMazeDrawing = () => {
       options: {
         wallColor: string;
         wallThickness: number;
+        perpendicularWalls: boolean;
       }
     ) => {
-      const { wallColor, wallThickness } = options;
+      const { wallColor, wallThickness, perpendicularWalls } = options;
 
       ctx.strokeStyle = wallColor;
       ctx.lineWidth = wallThickness;
@@ -155,14 +155,36 @@ export const useMazeDrawing = () => {
           const currentCell = maze[ring][cell];
           if (!currentCell?.eastWall) continue;
 
+          const cellProgress = cell / totalCells;
           const nextCellProgress = (cell + 1) / totalCells;
+          const outerStart = getPointOnRing(currentRadius, cellProgress);
           const outerEnd = getPointOnRing(currentRadius, nextCellProgress);
           const innerEnd = getPointOnRing(currentRadius - ringWidth, nextCellProgress);
 
-          ctx.beginPath();
-          ctx.moveTo(...outerEnd);
-          ctx.lineTo(...innerEnd);
-          ctx.stroke();
+          if (perpendicularWalls) {
+            // Calculate tangent vector along the ring wall
+            const dirX = outerEnd[0] - outerStart[0];
+            const dirY = outerEnd[1] - outerStart[1];
+
+            // Calculate normalized perpendicular vector
+            const length = Math.sqrt(dirX * dirX + dirY * dirY);
+            const perpX = -dirY / length;
+            const perpY = dirX / length;
+
+            // Connect outer ring wall to inner ring wall along the perpendicular direction
+            ctx.beginPath();
+            ctx.moveTo(...outerEnd);
+            // Project the point inward to intersect with the inner ring
+            const intersectX = outerEnd[0] + perpX * ringWidth * 0.866; // cos(30°) ≈ 0.866
+            const intersectY = outerEnd[1] + perpY * ringWidth * 0.866;
+            ctx.lineTo(intersectX, intersectY);
+            ctx.stroke();
+          } else {
+            ctx.beginPath();
+            ctx.moveTo(...outerEnd);
+            ctx.lineTo(...innerEnd);
+            ctx.stroke();
+          }
         }
       }
     };
@@ -334,10 +356,10 @@ export const useMazeDrawing = () => {
           // Draw entrance/exit arrows if enabled
           if (showArrows) {
             if (cell.isEntrance) {
-              drawArrow(ctx, row, col-2, cellSize, true, wallColor, rows, columns, 'left');
+              drawArrow(ctx, row, col-2, cellSize, true, wallColor, maze.length, maze[row].length, 'left');
             }
             if (cell.isExit) {
-              drawArrow(ctx, row, col+2, cellSize, false, wallColor, rows, columns, 'right');
+              drawArrow(ctx, row, col+2, cellSize, false, wallColor, maze.length, maze[row].length, 'right');
             }
           }
         }
@@ -363,7 +385,8 @@ export const useMazeDrawing = () => {
       case 'polygon':
         drawPolygonMaze(ctx, maze, sides, {
           wallColor,
-          wallThickness
+          wallThickness,
+          perpendicularWalls
         });
         break;
       case 'text':

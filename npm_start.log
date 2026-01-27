@@ -256,3 +256,201 @@ src/lib/algorithms/wilson.ts
 
 webpack compiled with 1 warning
 No issues found.
+Compiling...
+Compiled with warnings.
+
+[eslint]
+src/components/MazeGenerator/Canvas.tsx
+  Line 107:6:  React Hook useEffect has a missing dependency: 'getCanvasDimensions'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  Line 111:9:  'arrowPadding' is assigned a value but never used                                                                       @typescript-eslint/no-unused-vars
+
+src/components/MazeGenerator/Controls/GenerationSection.tsx
+  Line 7:10:  'useMazeContext' is defined but never used  @typescript-eslint/no-unused-vars
+
+src/components/MazeGenerator/index.tsx
+  Line 72:6:  React Hook useEffect has a missing dependency: 'generateMaze'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+src/contexts/MazeProvider.tsx
+  Line 66:6:  React Hook useEffect has a missing dependency: 'generateMaze'. Either include it or remove the dependency array               react-hooks/exhaustive-deps
+  Line 95:6:  React Hook useCallback has an unnecessary dependency: 'appearanceSettings'. Either exclude it or remove the dependency array  react-hooks/exhaustive-deps
+
+src/hooks/useMazeDrawing.ts
+  Line 38:7:   'text' is assigned a value but never used                                                                                       @typescript-eslint/no-unused-vars
+  Line 553:6:  React Hook useCallback has unnecessary dependencies: 'columns' and 'sides'. Either exclude them or remove the dependency array  react-hooks/exhaustive-deps
+
+src/lib/algorithms/aldous-broder.ts
+  Line 17:18:  Function declared in a loop contains unsafe references to variable(s) 'currentRow', 'currentCol'  no-loop-func
+
+src/lib/algorithms/eller.ts
+  Line 58:21:  'set' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+src/lib/algorithms/kruskal.ts
+  Line 2:27:  'getRandomElement' is defined but never used  @typescript-eslint/no-unused-vars
+
+src/lib/algorithms/prims.ts
+  Line 1:16:  'Position' is defined but never used             @typescript-eslint/no-unused-vars
+  Line 2:10:  'removeWalls' is defined but never used          @typescript-eslint/no-unused-vars
+  Line 2:23:  'getVisitedNeighbors' is defined but never used  @typescript-eslint/no-unused-vars
+
+src/lib/algorithms/recursiveBacktracker.ts
+  Line 1:16:  'Position' is defined but never used               @typescript-eslint/no-unused-vars
+  Line 2:10:  'removeWalls' is defined but never used            @typescript-eslint/no-unused-vars
+  Line 2:23:  'getUnvisitedNeighbors' is defined but never used  @typescript-eslint/no-unused-vars
+  Line 2:46:  'getVisitedNeighbors' is defined but never used    @typescript-eslint/no-unused-vars
+
+src/lib/algorithms/utils.ts
+  Line 1:26:  'MazeSettings' is defined but never used  @typescript-eslint/no-unused-vars
+
+src/lib/algorithms/wilson.ts
+  Line 39:22:  Function declared in a loop contains unsafe references to variable(s) 'walkRow', 'walkCol'  no-loop-func
+  Line 49:46:  Function declared in a loop contains unsafe references to variable(s) 'walkRow', 'walkCol'  no-loop-func
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint]
+src/components/MazeGenerator/Canvas.tsx
+  Line 107:6:  React Hook useEffect has a missing dependency: 'getCanvasDimensions'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  Line 111:9:  'arrowPadding' is assigned a value but never used                                                                       @typescript-eslint/no-unused-vars
+
+src/components/MazeGenerator/Controls/GenerationSection.tsx
+  Line 7:10:  'useMazeContext' is defined but never used  @typescript-eslint/no-unused-vars
+
+src/components/MazeGenerator/index.tsx
+  Line 72:6:  React Hook useEffect has a missing dependency: 'generateMaze'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+src/contexts/MazeProvider.tsx
+  Line 66:6:  React Hook useEffect has a missing dependency: 'generateMaze'. Either include it or remove the dependency array               react-hooks/exhaustive-deps
+  Line 95:6:  React Hook useCallback has an unnecessary dependency: 'appearanceSettings'. Either exclude it or remove the dependency array  react-hooks/exhaustive-deps
+
+src/hooks/useMazeDrawing.ts
+  Line 38:7:   'text' is assigned a value but never used                                                                                       @typescript-eslint/no-unused-vars
+  Line 553:6:  React Hook useCallback has unnecessary dependencies: 'columns' and 'sides'. Either exclude them or remove the dependency array  react-hooks/exhaustive-deps
+
+src/lib/algorithms/aldous-broder.ts
+  Line 17:18:  Function declared in a loop contains unsafe references to variable(s) 'currentRow', 'currentCol'  no-loop-func
+
+src/lib/algorithms/eller.ts
+  Line 58:21:  'set' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+src/lib/algorithms/kruskal.ts
+  Line 2:27:  'getRandomElement' is defined but never used  @typescript-eslint/no-unused-vars
+
+src/lib/algorithms/prims.ts
+  Line 1:16:  'Position' is defined but never used             @typescript-eslint/no-unused-vars
+  Line 2:10:  'removeWalls' is defined but never used          @typescript-eslint/no-unused-vars
+  Line 2:23:  'getVisitedNeighbors' is defined but never used  @typescript-eslint/no-unused-vars
+
+src/lib/algorithms/recursiveBacktracker.ts
+  Line 1:16:  'Position' is defined but never used               @typescript-eslint/no-unused-vars
+  Line 2:10:  'removeWalls' is defined but never used            @typescript-eslint/no-unused-vars
+  Line 2:23:  'getUnvisitedNeighbors' is defined but never used  @typescript-eslint/no-unused-vars
+  Line 2:46:  'getVisitedNeighbors' is defined but never used    @typescript-eslint/no-unused-vars
+
+src/lib/algorithms/utils.ts
+  Line 1:26:  'MazeSettings' is defined but never used  @typescript-eslint/no-unused-vars
+
+src/lib/algorithms/wilson.ts
+  Line 39:22:  Function declared in a loop contains unsafe references to variable(s) 'walkRow', 'walkCol'  no-loop-func
+  Line 49:46:  Function declared in a loop contains unsafe references to variable(s) 'walkRow', 'walkCol'  no-loop-func
+
+webpack compiled with 1 warning
+No issues found.
+Compiling...
+Compiled with warnings.
+
+[eslint]
+src/components/MazeGenerator/Canvas.tsx
+  Line 107:6:  React Hook useEffect has a missing dependency: 'getCanvasDimensions'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  Line 111:9:  'arrowPadding' is assigned a value but never used                                                                       @typescript-eslint/no-unused-vars
+
+src/components/MazeGenerator/Controls/GenerationSection.tsx
+  Line 7:10:  'useMazeContext' is defined but never used  @typescript-eslint/no-unused-vars
+
+src/components/MazeGenerator/index.tsx
+  Line 72:6:  React Hook useEffect has a missing dependency: 'generateMaze'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+src/contexts/MazeProvider.tsx
+  Line 66:6:  React Hook useEffect has a missing dependency: 'generateMaze'. Either include it or remove the dependency array               react-hooks/exhaustive-deps
+  Line 95:6:  React Hook useCallback has an unnecessary dependency: 'appearanceSettings'. Either exclude it or remove the dependency array  react-hooks/exhaustive-deps
+
+src/hooks/useMazeDrawing.ts
+  Line 576:6:  React Hook useCallback has unnecessary dependencies: 'columns' and 'sides'. Either exclude them or remove the dependency array  react-hooks/exhaustive-deps
+
+src/lib/algorithms/aldous-broder.ts
+  Line 17:18:  Function declared in a loop contains unsafe references to variable(s) 'currentRow', 'currentCol'  no-loop-func
+
+src/lib/algorithms/eller.ts
+  Line 58:21:  'set' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+src/lib/algorithms/kruskal.ts
+  Line 2:27:  'getRandomElement' is defined but never used  @typescript-eslint/no-unused-vars
+
+src/lib/algorithms/prims.ts
+  Line 1:16:  'Position' is defined but never used             @typescript-eslint/no-unused-vars
+  Line 2:10:  'removeWalls' is defined but never used          @typescript-eslint/no-unused-vars
+  Line 2:23:  'getVisitedNeighbors' is defined but never used  @typescript-eslint/no-unused-vars
+
+src/lib/algorithms/recursiveBacktracker.ts
+  Line 1:16:  'Position' is defined but never used               @typescript-eslint/no-unused-vars
+  Line 2:10:  'removeWalls' is defined but never used            @typescript-eslint/no-unused-vars
+  Line 2:23:  'getUnvisitedNeighbors' is defined but never used  @typescript-eslint/no-unused-vars
+  Line 2:46:  'getVisitedNeighbors' is defined but never used    @typescript-eslint/no-unused-vars
+
+src/lib/algorithms/utils.ts
+  Line 1:26:  'MazeSettings' is defined but never used  @typescript-eslint/no-unused-vars
+
+src/lib/algorithms/wilson.ts
+  Line 39:22:  Function declared in a loop contains unsafe references to variable(s) 'walkRow', 'walkCol'  no-loop-func
+  Line 49:46:  Function declared in a loop contains unsafe references to variable(s) 'walkRow', 'walkCol'  no-loop-func
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint]
+src/components/MazeGenerator/Canvas.tsx
+  Line 107:6:  React Hook useEffect has a missing dependency: 'getCanvasDimensions'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  Line 111:9:  'arrowPadding' is assigned a value but never used                                                                       @typescript-eslint/no-unused-vars
+
+src/components/MazeGenerator/Controls/GenerationSection.tsx
+  Line 7:10:  'useMazeContext' is defined but never used  @typescript-eslint/no-unused-vars
+
+src/components/MazeGenerator/index.tsx
+  Line 72:6:  React Hook useEffect has a missing dependency: 'generateMaze'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+src/contexts/MazeProvider.tsx
+  Line 66:6:  React Hook useEffect has a missing dependency: 'generateMaze'. Either include it or remove the dependency array               react-hooks/exhaustive-deps
+  Line 95:6:  React Hook useCallback has an unnecessary dependency: 'appearanceSettings'. Either exclude it or remove the dependency array  react-hooks/exhaustive-deps
+
+src/hooks/useMazeDrawing.ts
+  Line 576:6:  React Hook useCallback has unnecessary dependencies: 'columns' and 'sides'. Either exclude them or remove the dependency array  react-hooks/exhaustive-deps
+
+src/lib/algorithms/aldous-broder.ts
+  Line 17:18:  Function declared in a loop contains unsafe references to variable(s) 'currentRow', 'currentCol'  no-loop-func
+
+src/lib/algorithms/eller.ts
+  Line 58:21:  'set' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+src/lib/algorithms/kruskal.ts
+  Line 2:27:  'getRandomElement' is defined but never used  @typescript-eslint/no-unused-vars
+
+src/lib/algorithms/prims.ts
+  Line 1:16:  'Position' is defined but never used             @typescript-eslint/no-unused-vars
+  Line 2:10:  'removeWalls' is defined but never used          @typescript-eslint/no-unused-vars
+  Line 2:23:  'getVisitedNeighbors' is defined but never used  @typescript-eslint/no-unused-vars
+
+src/lib/algorithms/recursiveBacktracker.ts
+  Line 1:16:  'Position' is defined but never used               @typescript-eslint/no-unused-vars
+  Line 2:10:  'removeWalls' is defined but never used            @typescript-eslint/no-unused-vars
+  Line 2:23:  'getUnvisitedNeighbors' is defined but never used  @typescript-eslint/no-unused-vars
+  Line 2:46:  'getVisitedNeighbors' is defined but never used    @typescript-eslint/no-unused-vars
+
+src/lib/algorithms/utils.ts
+  Line 1:26:  'MazeSettings' is defined but never used  @typescript-eslint/no-unused-vars
+
+src/lib/algorithms/wilson.ts
+  Line 39:22:  Function declared in a loop contains unsafe references to variable(s) 'walkRow', 'walkCol'  no-loop-func
+  Line 49:46:  Function declared in a loop contains unsafe references to variable(s) 'walkRow', 'walkCol'  no-loop-func
+
+webpack compiled with 1 warning
+No issues found.
