@@ -1,4 +1,4 @@
-import { Cell } from '../types';
+import { Cell } from '../../types';
 import { createEmptyGrid, getRandomWithBias } from './utils';
 
 export const sidewinderMaze = (

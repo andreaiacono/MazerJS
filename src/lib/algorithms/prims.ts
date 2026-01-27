@@ -1,4 +1,4 @@
-import { Cell, Position } from '../types';
+import { Cell, Position } from '../../types';
 import { removeWalls, getVisitedNeighbors, createEmptyGrid, getRandomWithBias } from './utils'
 
 export const primsAlgorithm = (

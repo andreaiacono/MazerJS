@@ -8,7 +8,7 @@ import {
   MazeAlgorithm,
   AppearanceSettings,
   SolverSettings
-} from '../utils/types';
+} from '../types';
 import { useMazeSolving } from '../hooks/useMazeSolving';
 import { useMazeGeneration } from '../hooks/useMazeGeneration';  // Add this import
 

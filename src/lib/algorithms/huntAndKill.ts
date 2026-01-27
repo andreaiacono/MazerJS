@@ -1,4 +1,4 @@
-import { Cell, Position } from '../types';
+import { Cell, Position } from '../../types';
 import { createEmptyGrid } from './utils';
 
 export const huntAndKill = (

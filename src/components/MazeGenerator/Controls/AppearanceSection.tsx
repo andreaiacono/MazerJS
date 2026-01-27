@@ -4,7 +4,7 @@ import { Checkbox } from '../../ui/checkbox';
 import { NumberSlider } from '../../ui/number-slider';
 import { AccordionItem, AccordionTrigger, AccordionContent } from '../../ui/accordion';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select';
-import { FrameType, AppearanceSettings } from '../../../utils/types';
+import { FrameType, AppearanceSettings } from '../../../types';
 import { useMazeContext } from '../../../contexts/MazeContext';
 
 interface AppearanceSectionProps {

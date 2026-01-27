@@ -1,5 +1,5 @@
 import React, { createContext, useContext } from 'react';
-import { Cell, MazeSettings, FrameType, MazeAlgorithm, AppearanceSettings, SolverSettings, Position } from '../utils/types';
+import { Cell, MazeSettings, FrameType, MazeAlgorithm, AppearanceSettings, SolverSettings, Position } from '../types';
 // import { useMazeDrawing } from '../hooks/useMazeDrawing';
 
 interface MazeContextType {

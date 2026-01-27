@@ -1,8 +1,8 @@
 import React, { useRef, useEffect } from 'react';
-import { Cell, FrameType, Position } from '../../utils/types';
-import { getArrowPadding } from '../../utils/helpers/drawing';
+import { Cell, FrameType, Position } from '../../types';
+import { getArrowPadding } from '../../lib/helpers/drawing';
 import { useMazeDrawing } from '../../hooks/useMazeDrawing';
-import { getMazeDimensions } from '../../utils/helpers/misc';
+import { getMazeDimensions } from '../../lib/helpers/misc';
 
 interface CanvasProps {
   maze: Cell[][];
