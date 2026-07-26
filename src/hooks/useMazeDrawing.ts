@@ -75,10 +75,10 @@ export const useMazeDrawing = () => {
         showArrows: boolean;
         solutionColor: string;
         solutionPath?: Position[];
-        perpendicularWalls?: boolean;
+        perpendicularWalls: boolean;
       }
     ) => {
-      const { wallColor, wallThickness, showArrows, perpendicularWalls = false } = options;
+      const { wallColor, wallThickness, showArrows, perpendicularWalls } = options;
 
       ctx.strokeStyle = wallColor;
       ctx.lineWidth = wallThickness;
@@ -162,9 +162,8 @@ export const useMazeDrawing = () => {
           const outerEnd = getPointOnRing(currentRadius, nextCellProgress);
           const innerStart = getPointOnRing(currentRadius - ringWidth, cellProgress);
           const innerEnd = getPointOnRing(currentRadius - ringWidth, nextCellProgress);
-
-          // if (perpendicularWalls) {          
-          if (false) {
+       
+          if (perpendicularWalls) {
             // Calculate tangent vector along the ring wall
             const dirX = outerEnd[0] - outerStart[0];
             const dirY = outerEnd[1] - outerStart[1];

@@ -72,14 +72,17 @@ export const getValidMoves = (
           row: pos.row + rowDelta,
           col: pos.col + colDelta
         };
-        
+
         if (
           next.row >= 0 && next.row < maze.length &&
           next.col >= 0 && next.col < maze[0].length &&
           !visited.has(`${next.row},${next.col}`)
         ) {
           const nextCell = maze[next.row][next.col];
-          if (!nextCell[oppositeWall]) {
+          // For text mazes, ensure the cell is part of the text shape (visited: true)
+          // For other mazes, this check has no effect as visited is used differently
+          const isValidTextCell = frameType !== 'text' || nextCell.visited;
+          if (!nextCell[oppositeWall] && isValidTextCell) {
             moves.push(next);
           }
         }

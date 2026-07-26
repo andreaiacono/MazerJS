@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { Cell, Position, SolvingState } from '../utils/types';
 import { getValidMoves } from '../utils/helpers/pathfinding';
+import { toast } from '../components/ui/use-toast';
 
 export const useMazeSolving = (
   maze: Cell[][],
@@ -81,7 +82,7 @@ export const useMazeSolving = (
           await Promise.race([
             delay(100 - speedRef.current),
             new Promise((_, reject) => {
-              signal.addEventListener('abort', () => reject(new Error('Animation aborted')));
+              signal.addEventListener('abort', () => reject(new Error('Animation aborted')), { once: true });
             })
           ]);
         } catch (error) {
@@ -129,6 +130,11 @@ export const useMazeSolving = (
 
       if (!entrance || !exit) {
         console.error('No entrance or exit found');
+        toast({
+          title: "Cannot solve maze",
+          description: "No entrance or exit found in the maze. Please regenerate the maze.",
+          variant: "destructive",
+        });
         abortSolving(onDrawPath);
         return;
       }
@@ -149,7 +155,12 @@ export const useMazeSolving = (
         setIsSolutionShown(true)
         abortControllerRef.current = null;
       } else if (!signal.aborted) {
-        // If not solved and not manually aborted, clear everything
+        // If not solved and not manually aborted, show error and clear everything
+        toast({
+          title: "No solution found",
+          description: "The maze appears to have no path from entrance to exit. Please regenerate the maze.",
+          variant: "destructive",
+        });
         abortSolving(onDrawPath);
       }
     } catch (error) {

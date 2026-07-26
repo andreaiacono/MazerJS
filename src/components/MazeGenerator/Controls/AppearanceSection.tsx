@@ -120,8 +120,8 @@ export const AppearanceSection: React.FC<AppearanceSectionProps> = ({
           {frameType === 'polygon' && (
             <div className="flex items-center space-x-2">
               <Checkbox
-                disabled={true}
-                checked={false}
+                disabled={false}
+                checked={settings.perpendicularWalls}
                 label="Perpendicular Walls"
                 onChange={(checked: boolean) => onSettingChange('perpendicularWalls', checked)}
               />

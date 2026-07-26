@@ -147,7 +147,8 @@ export const useMazeGeneration = (
         maze = adjustMazeToCircular(maze, rows, columns, cellSize, mazeSettings);
       } else if (frameType === 'polygon') {
         maze = adjustMazeToPolygon(maze, rows, columns, polygonSides, cellSize, mazeSettings);
-        maze = addEntranceAndExit(maze, effectiveRows, effectiveColumns, frameType, mazeSettings);
+        maze = ensurePolygonConnectivity(maze);
+        // Polygon mazes already have entrance/exit set in adjustMazeToPolygon
       } else if (frameType === 'text') {
         maze = adjustMazeToText(maze, text, effectiveRows, effectiveColumns, cellSize, letterDistance, letterSize, upperLetterConnector, lowerLetterConnector);
         maze = ensureConnectivity(maze);
@@ -693,6 +694,38 @@ const createPath = (from: Position, to: Position, maze: Cell[][]): void => {
       }
     }
   }
+};
+
+const ensurePolygonConnectivity = (maze: Cell[][]): Cell[][] => {
+  const rings = maze.length;
+  if (rings <= 1) return maze;
+
+  const sectors = maze[0].length;
+
+  // Ensure each ring has at least one connection to the next inner ring
+  for (let ring = rings - 1; ring > 0; ring--) {
+    // Check if there's at least one connection from this ring to the inner ring
+    let hasConnection = false;
+    for (let sector = 0; sector < sectors; sector++) {
+      const currentCell = maze[ring][sector];
+      const innerCell = maze[ring - 1][sector];
+
+      // Check if there's a passage between current ring and inner ring
+      if (!currentCell.northWall && !innerCell.southWall) {
+        hasConnection = true;
+        break;
+      }
+    }
+
+    // If no connection exists, create one at a random sector
+    if (!hasConnection) {
+      const randomSector = Math.floor(Math.random() * sectors);
+      maze[ring][randomSector].northWall = false;
+      maze[ring - 1][randomSector].southWall = false;
+    }
+  }
+
+  return maze;
 };
 
 const ensureConnectivity = (maze: Cell[][]): Cell[][] => {
